@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enregistrement de Compte</title>
+<link rel="stylesheet" href="créerUnCompte.css">
+</head>
+<body>
+<div class="container">
+  <h2>Enregistrement de Compte</h2>
+  <form id="registerForm">
+    <div class="form-group">
+      <label for="accountType">Type de Compte:</label>
+      <select id="accountType" name="accountType">
+        <option value="client">Clients</option>
+        <option value="employés">Employés</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="firstName">Prénom:</label>
+      <input type="text" id="firstName" name="firstName" required>
+    </div>
+    <div class="form-group">
+      <label for="lastName">Nom:</label>
+      <input type="text" id="lastName" name="lastName" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Adresse Email:</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="phone">Numéro de Téléphone:</label>
+      <input type="tel" id="phone" name="phone" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Mot de Passe:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <div class="form-group">
+      <label for="confirmPassword">Confirmer le Mot de Passe:</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required>
+      </div>
+    </div>
+    <button type="submit">S'enregistrer</button>
+  </form>
+</div>
+<script src="créerUnCompte.js"></script>
+</body>
+</html>
