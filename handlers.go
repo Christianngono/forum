@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -35,38 +36,37 @@ type Comment struct {
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-        return
+		return
 	}
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	defer r.Body.Close()
 
 	// Hash the password before storing it in the database
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	user.Password = string(hashedPassword)
 
 	stmt, err := db.Prepare("INSERT INTO users (email, username, password) VALUES (?,?,?)")
 	if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Email,user.Username, user.Password)
+	_, err = stmt.Exec(user.Email, user.Username, user.Password)
 	if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusCreated)
-	
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,10 +101,21 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Implement session creation and management with cookies
+	// Generate a new session UUID
+	sessionID, err := uuid.NewRandom()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Store the session UUID in the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_id",
+		Value:   sessionID.String(),
+		Expires: time.Now().Add(24 * time.Hour),
+	})
 
 	w.WriteHeader(http.StatusOK)
-	
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -155,13 +166,11 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	    posts = append(posts, post)
+		posts = append(posts, post)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
-
 }
-
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour la création de commentaire
@@ -192,7 +201,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	
+
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -217,5 +226,5 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comments)
-	
+
 }
