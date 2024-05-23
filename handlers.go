@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -31,33 +33,50 @@ type Comment struct {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	// Gérer l'inscription des utilidateurs
-	user := User{}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+	}
+	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
 	defer r.Body.Close()
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/forum")
+	// Hash the password before storing it in the database
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+	user.Password = string(hashedPassword)
 
 	stmt, err := db.Prepare("INSERT INTO users (email, username, password) VALUES (?,?,?)")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 	defer stmt.Close()
+
+	_, err = stmt.Exec(user.Email,user.Username, user.Password)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+	w.WriteHeader(http.StatusCreated)
+	
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour gérer la connexion
-	user := User{}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -65,24 +84,37 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/forum")
+	var storedUser User
+	err = db.QueryRow("SELECT id, password FROM users WHERE email = ?", user.Email).Scan(&storedUser.ID, &storedUser.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err == sql.ErrNoRows {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
-	defer db.Close()
 
-	stmt, err := db.Prepare("SELECT * FROM users WHERE email =? AND password =?")
+	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
-	defer stmt.Close()
+
+	// TODO: Implement session creation and management with cookies
+
+	w.WriteHeader(http.StatusOK)
+	
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour gérer la création de post
-	post := Post{}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var post Post
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -90,41 +122,55 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/forum")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	stmt, err := db.Prepare("INSERT INTO posts (user_id, title, content) VALUES (?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
+
+	_, err = stmt.Exec(post.UserID, post.Title, post.Content)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	// Récupérer les posts
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/forum")
+	rows, err := db.Query("SELECT id, user_id, title, content, created_at FROM posts")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer db.Close()
+	defer rows.Close()
 
-	stmt, err := db.Prepare("SELECT * FROM posts")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.CreatedAt)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	    posts = append(posts, post)
 	}
-	defer stmt.Close()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+
 }
+
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour la création de commentaire
-	comment := Comment{}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var comment Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -132,34 +178,44 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/forum")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	stmt, err := db.Prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
+
+	_, err = stmt.Exec(comment.PostID, comment.UserID, comment.Content)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour récupérer les commentaires
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/forum")
+	rows, err := db.Query("SELECT id, post_id, user_id, content, created_at FROM comments")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer db.Close()
+	defer rows.Close()
 
-	stmt, err := db.Prepare("SELECT * FROM comments")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		comments = append(comments, comment)
 	}
-	defer stmt.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comments)
+	
 }
