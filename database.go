@@ -57,8 +57,6 @@ func CreateTables() {
 	if err!= nil {
         log.Fatalf("Error creating comments table: %v\n", err)
     }
-}
-
-func Close() {
+	log.Println("Tables created")
 	db.Close()
 }
