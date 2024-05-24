@@ -3,6 +3,7 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -17,25 +18,25 @@ type User struct {
 	Password string `json:"password"`
 }
 
-type Post struct {
-	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-}
+var templates = template.Must(template.ParseFiles("templates/register.html",
+	"templates/login.html",
+	"templates/index.html",
+	"templates/create-post.html",
+	"templates/posts.html",
+	"templates/create-comment.html",
+	"templates/comments.html",
+))
 
-type Comment struct {
-	ID        int       `json:"id"`
-	PostID    int       `json:"post_id"`
-	UserID    int       `json:"user_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
+func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+	err := templates.ExecuteTemplate(w, tmpl, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderTemplate(w, "register.html", nil)
 		return
 	}
 	var user User
@@ -72,7 +73,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour gérer la connexion
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderTemplate(w, "login.html", nil)
 		return
 	}
 
@@ -116,115 +117,4 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	// Code pour gérer la création de post
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var post Post
-	err := json.NewDecoder(r.Body).Decode(&post)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	stmt, err := db.Prepare("INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(post.UserID, post.Title, post.Content)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-}
-
-func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
-	// Récupérer les posts
-	rows, err := db.Query("SELECT id, user_id, title, content, created_at FROM posts")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var post Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.CreatedAt)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		posts = append(posts, post)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
-}
-
-func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
-	// Code pour la création de commentaire
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var comment Comment
-	err := json.NewDecoder(r.Body).Decode(&comment)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	stmt, err := db.Prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(comment.PostID, comment.UserID, comment.Content)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-
-}
-
-func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
-	// Code pour récupérer les commentaires
-	rows, err := db.Query("SELECT id, post_id, user_id, content, created_at FROM comments")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	var comments []Comment
-	for rows.Next() {
-		var comment Comment
-		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		comments = append(comments, comment)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comments)
-
 }

@@ -3,7 +3,7 @@ body {
 }
 
 header {
-    background-color: #fffaee;
+    background-color: #d44bb0;
     padding: 20px;
     display: flex;
     align-items: center;
@@ -25,12 +25,12 @@ header {
 
 .left-elements h1 {
     margin-left: 350px;
-    color: #d81d09; 
+    color: #ffffff; 
 }
 
 .button {
     margin: 10px;
-    background-color: #ee871e;
+    background-color: #ff00d0;
     color: #fffaee;
     padding: 10px 0px;
     border: none;
@@ -41,7 +41,7 @@ header {
 }
 
 .button:hover {
-    background-color: #d81d09;
+    background-color: #ff002f;
   }
 
 main {
@@ -65,7 +65,7 @@ main {
 }
 
 footer {
-    background-color: #fffaee;
+    background-color: #d44bb0;
     padding: 20px;
     display: flex;
     justify-content: space-between;
