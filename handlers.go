@@ -3,6 +3,7 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -33,9 +34,25 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+var templates = template.Must(template.ParseFiles("templates/register.html",
+	"templates/login.html",
+	"templates/index.html",
+	"templates/create-post.html",
+	"templates/posts.html",
+	"templates/create-comment.html",
+	"templates/comments.html",
+))
+
+func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+	err := templates.ExecuteTemplate(w, tmpl, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderTemplate(w, "register.html", nil)
 		return
 	}
 	var user User
@@ -72,7 +89,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour gérer la connexion
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderTemplate(w, "login.html", nil)
 		return
 	}
 
@@ -121,7 +138,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour gérer la création de post
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderTemplate(w, "create-post.html", nil)
 		return
 	}
 
@@ -147,6 +164,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	renderTemplate(w, "posts.html", post)
 }
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
@@ -168,14 +186,13 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	renderTemplate(w, "posts.html", posts)
 }
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour la création de commentaire
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		renderTemplate(w, "create-comment.html", nil)
 		return
 	}
 
@@ -201,6 +218,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	renderTemplate(w, "comments.html", comment)
 
 }
 
@@ -224,7 +242,5 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		comments = append(comments, comment)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comments)
-
+	renderTemplate(w, "comments.html", comments)
 }
