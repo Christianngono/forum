@@ -25,8 +25,8 @@ header {
     border-radius: 60%;
 }
 
-.center-elements h1 {
-    text-align: center;
+.left-elements h1 {
+    margin-left: 320px;
     color: #fb00ff; 
 }
 
