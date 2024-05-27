@@ -17,7 +17,7 @@ type Comment struct {
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour la création de commentaire
 	if r.Method != http.MethodPost {
-		renderTemplate(w, "create-comment.html", nil)
+		renderTemplate(w, "Accueil.html", nil)
 		return
 	}
 
@@ -44,11 +44,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	renderTemplate(w, "comments.html", comment)
-}
-
-func renderTemplate(w http.ResponseWriter, s string, data interface{}) {
-	// Implémentez le rendu du template ici
-	panic("unimplemented")
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {

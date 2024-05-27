@@ -36,7 +36,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		renderTemplate(w, "register.html", nil)
+		renderTemplate(w, "CréerUnCompte.html", nil)
 		return
 	}
 	var user User
@@ -73,7 +73,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour gérer la connexion
 	if r.Method != http.MethodPost {
-		renderTemplate(w, "login.html", nil)
+		renderTemplate(w, "SeConnecter.html", nil)
 		return
 	}
 
