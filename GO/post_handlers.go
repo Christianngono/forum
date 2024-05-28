@@ -15,9 +15,8 @@ type Post struct {
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	// Code pour gérer la création de post
 	if r.Method != http.MethodPost {
-		renderTemplate(w, "create-post.html", nil)
+		renderTemplate(w, "templates/create-post.html", nil)
 		return
 	}
 
@@ -43,11 +42,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	renderTemplate(w, "Accueil.html", post)
+	renderTemplate(w, "templates/posts.html", post)
 }
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
-	// Récupérer les posts
 	rows, err := db.Query("SELECT id, user_id, title, content, created_at FROM posts")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,5 +63,5 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
-	renderTemplate(w, "Accueil.html", posts)
+	renderTemplate(w, "templates/posts.html", posts)
 }
