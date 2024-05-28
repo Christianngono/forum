@@ -117,4 +117,5 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
+	renderTemplate(w, "index.html", storedUser)
 }
