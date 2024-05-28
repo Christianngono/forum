@@ -12,12 +12,12 @@ func main() {
 	forum.CreateTables()
 
 	// Définir les routes et leurs handlers correspondants
-	http.HandleFunc("HTML/CréerUnCompte", forum.RegisterHandler)
-	http.HandleFunc("HTML/SeConnecter", forum.LoginHandler)
-	http.HandleFunc("HTML/create-post", forum.CreatePostHandler)
-	http.HandleFunc("HTML/get-posts", forum.GetPostsHandler)
-	http.HandleFunc("HTML/create-comment", forum.CreateCommentHandler)
-	http.HandleFunc("HTML/get-comments", forum.GetCommentsHandler)
+	http.HandleFunc("templates/register", forum.RegisterHandler)
+	http.HandleFunc("templates/login", forum.LoginHandler)
+	http.HandleFunc("templates/create-post", forum.CreatePostHandler)
+	http.HandleFunc("templates/get-posts", forum.GetPostsHandler)
+	http.HandleFunc("templates/create-comment", forum.CreateCommentHandler)
+	http.HandleFunc("templates/get-comments", forum.GetCommentsHandler)
 
 	// Démarrer le serveur web
 	log.Println("Server started on port 8080")
