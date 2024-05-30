@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/gorilla/sessions"
 )
 
 type User struct {
@@ -18,20 +19,38 @@ type User struct {
 	Password string `json:"password"`
 }
 
-var templates = template.Must(template.ParseFiles("templates/register.html",
-	"templates/login.html",
-	"templates/index.html",
-	"templates/create-post.html",
-	"templates/posts.html",
-	"templates/create-comment.html",
-	"templates/comments.html",
-))
+var templates = template.Must(template.ParseFiles("/templates/index.html", 
+    "logout.html",
+	"register.html",
+    "login.html",
+    "create-post.html",
+    "posts.html",
+    "comments.html",
+	))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	err := templates.ExecuteTemplate(w, tmpl, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "index.html", nil)
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Initialiser le store de session  
+	var store = sessions.NewCookieStore([]byte("secret-key"))
+	session, err := store.Get(r, "session")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer session.Save(r, w)
+
+    session.Options.MaxAge = -1
+    renderTemplate(w, "index.html", nil)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +87,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+	renderTemplate(w, "index.html", nil)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -117,5 +137,5 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	renderTemplate(w, "index.html", storedUser)
+	renderTemplate(w, "index.html", nil)
 }
