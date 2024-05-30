@@ -42,7 +42,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	renderTemplate(w, "posts.html", post)
+	renderTemplate(w, "posts.html", nil)
 }
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +63,6 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
-	renderTemplate(w, "posts.html", posts)
+	renderTemplate(w, "posts.html", nil)
 }
 
