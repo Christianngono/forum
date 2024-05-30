@@ -22,9 +22,14 @@ func CreateTables() {
 	createUsersTable := `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+		genre TEXT NOT NULL,
+		nom TEXT NOT NULL,
+		prenom TEXT NOT NULL,
+		dateNaissance DATE NOT NULL,
+		telephone TEXT NOT NULL,
 	);`
+
 	createPostsTable := `CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
