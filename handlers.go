@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -19,14 +19,13 @@ type User struct {
 	Password string `json:"password"`
 }
 
-var templates = template.Must(template.ParseFiles("/templates/index.html", 
-    "logout.html",
-	"register.html",
-    "login.html",
-    "create-post.html",
-    "posts.html",
-    "comments.html",
-	))
+var templates = template.Must(template.ParseFiles("../templates/index.html",
+	"../templates/register.html",
+	"../templates/login.html",
+	"../templates/create-post.html",
+	"../templates/posts.html",
+	"../templates/comments.html",
+))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	err := templates.ExecuteTemplate(w, tmpl, data)
@@ -40,17 +39,17 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Initialiser le store de session  
+	// Initialiser le store de session
 	var store = sessions.NewCookieStore([]byte("secret-key"))
 	session, err := store.Get(r, "session")
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-    defer session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer session.Save(r, w)
 
-    session.Options.MaxAge = -1
-    renderTemplate(w, "index.html", nil)
+	session.Options.MaxAge = -1
+	renderTemplate(w, "index.html", nil)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
