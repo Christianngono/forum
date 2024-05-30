@@ -63,6 +63,6 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
-	renderTemplate(w, "posts.html", nil)
+	renderTemplate(w, "posts.html", posts)
 }
 
