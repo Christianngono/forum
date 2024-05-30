@@ -43,7 +43,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	renderTemplate(w, "comments.html", comment)
+	renderTemplate(w, "comments.html", nil)
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +64,8 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		comments = append(comments, comment)
+		
 	}
 
-	renderTemplate(w, "comments.html", comments)
+	renderTemplate(w, "comments.html", nil)
 }
