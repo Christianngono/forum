@@ -63,9 +63,8 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		comments = append(comments, comment)
-		
+		comments = append(comments, comment)	
 	}
 
-	renderTemplate(w, "comments.html", nil)
+	renderTemplate(w, "comments.html", comments)
 }
