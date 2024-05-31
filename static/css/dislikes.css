@@ -1,60 +1,61 @@
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f9;
+    background-color: #ffebee;
     color: #333;
     margin: 0;
-    padding: 0;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
 }
 
 /* Style for h1 */
 h1 {
     font-size: 3rem;
-    color: #4CAF50;
+    color: #d32f2f;
     text-shadow: 2px 2px 4px #000000;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     animation: fadeIn 2s ease-in-out;
 }
 
-/* Style for form */
-form {
-    background-color: #fff;
+/* Style for links */
+a {
+    background-color: #d32f2f;
+    color: #ffffff;
+    padding: 10px 20px;
+    margin: 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+}
+
+a:hover {
+    background-color: #9a0007;
+    transform: scale(1.05);
+}
+
+/* Style for dislikes section */
+.dislikes {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
     animation: slideIn 1s ease-in-out;
 }
 
-/* Style for input fields */
-input[type="email"], input[type="password"] {
-    width: 100%;
-    padding: 10px;
+/* Style for individual dislike */
+.dislike {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
     margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
 }
 
-/* Style for button */
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-button:hover {
-    background-color: #45a049;
-    transform: scale(1.05);
+.dislike:last-child {
+    border-bottom: none;
 }
 
 /* Animation for fade-in effect */
