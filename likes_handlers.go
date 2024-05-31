@@ -30,7 +30,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	_, err = db.Exec("INSERT INTO likes (user_id, post_id) VALUES (?, ?)", like.UserID, like.PostID)
+	_, err = DB.Exec("INSERT INTO likes (user_id, post_id) VALUES (?, ?)", like.UserID, like.PostID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -55,7 +55,7 @@ func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	_, err = db.Exec("INSERT INTO dislikes (user_id, post_id) VALUES (?, ?)", dislike.UserID, dislike.PostID)
+	_, err = DB.Exec("INSERT INTO dislikes (user_id, post_id) VALUES (?, ?)", dislike.UserID, dislike.PostID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
