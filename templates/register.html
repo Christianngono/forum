@@ -3,61 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un compte</title>
+    <title>Register</title>
     <link rel="stylesheet" href="../CSS/register.css">
 </head>
 <body>
 <div class="container">
-    <h1>Créer un compte</h1>
+    <h1>Create account</h1>
     <form action="/register" method="POST">
         <!-- Genre -->
-        <label for="genre">Genre:</label>
+        <label for="genre">Gender:</label>
         <select id="genre" name="genre">
-            <option value="homme">Homme</option>
-            <option value="femme">Femme</option>
-            <option value="autre">Autre</option>
+            <option value="homme">Man</option>
+            <option value="femme">Women</option>
+            <option value="autre">Other</option>
         </select>
         <br>
     
         <!-- Nom -->
-        <label for="nom">Nom:</label>
+        <label for="nom">Name:</label>
         <input type="text" id="nom" name="nom" required>
         <br>
     
         <!-- Prénom -->
-        <label for="prenom">Prénom:</label>
+        <label for="prenom">FirstName:</label>
         <input type="text" id="prenom" name="prenom" required>
         <br>
     
         <!-- Date de naissance -->
-        <label for="dateNaissance">Date de naissance:</label>
+        <label for="dateNaissance">Date of birth:</label>
         <input type="date" id="dateNaissance" name="dateNaissance" required>
         <br>
     
         <!-- Adresse e-mail -->
-        <label for="email">Adresse e-mail:</label>
+        <label for="email">E-mail address:</label>
         <input type="email" id="email" name="email" required>
         <br>
        
         <!-- Numéro de téléphone -->
-        <label for="telephone">Numéro de téléphone:</label>
+        <label for="telephone">Phone number:</label>
         <input type="tel" id="telephone" name="telephone" pattern="[0-9]{10}" required>
         <br>
 
         <!-- Mot de passe -->
-        <label for="password">Mot de passe:</label>
+        <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
         <br>
 
         <!-- Confirmation du mot de passe -->
-        <label for="confirmPassword">Confirmer le mot de passe:</label>
+        <label for="confirmPassword">Confirm your password:</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required>
         <br>
     
-        <button type="submit">Créer un compte</button>
+        <button type="submit">Register</button>
     </form>
     
-    <p class="privacy">En créant un compte, vous acceptez notre <a href="Politique_De_Confidentialite.html">politique de confidentialité</a>.</p>
+    <p class="privacy">By creating an account, you agree to our <a href=“Politique_De_Confidentialite.html”>privacy policy</a>.</p>
 </div>
 
 </body>

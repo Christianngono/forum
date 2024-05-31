@@ -3,30 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum TITUS</title>
+    <title>Home - Forum</title>
     <link rel="stylesheet" href="../CSS/home.css">
 </head>
 <body>
     <header>
-        <div class="left-elements">
-                <img src="../IMAGE/Logo TITUS.png" alt="Logo TITUS">
-                <h1>Forum TITUS</h1>
+        <div class="container">
+            <div class="header-left">
+                <img src="../IMAGE/Logo TITUS.png" alt="Logo" class="logo">
             </div>
-        <div class="right-elements">
-            <a href="profile.html">
-                <img id="homeAvatar" src="../IMAGE/Avatar 0.jpg" alt="Profil_Avatar">
-            </a>
-            <a href="login.html" class="button">Login</a>
-            <a href="register.html" class="button">Register</a>
+            <h1 class="welcome-text">Welcome to TITUS</h1>
+            <p>TITUS is a forum where you can share your opinions, debate, share, talk with other users as long as respect for others and their opinions is not compromised. Here you are free! </p> 
+            <div class="header-right">
+                <img src="../IMAGE/Avatar 0.jpg" alt="Avatar" class="avatar" id="profileAvatar">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="register.html">Register</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
+
     <main>
-        <div class="left-section">
-         
+        <div class="container">
+            <h2>Last Posts</h2>
+            <div class="post">
+                <h3>Titre du Post 1</h3>
+                <p>Ceci est le contenu du post 1. Il peut inclure des commentaires et des interactions
+
+                <p><a href="#">Lire la suite...</a></p>
+            </div>
+            <div class="post">
+                <h3>Titre du Post 2</h3>
+                <p>Ceci est le contenu du post 2. Il peut inclure des commentaires et des interactions entre utilisateurs.</p>
+                <p><a href="#">Lire la suite...</a></p>
+            </div>
+            <!-- Ajoutez plus de posts ici -->
         </div>
     </main>
 
     <footer>
-</footer>
+        <div class="container">
+            <p>&copy; 2024 Forum. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>

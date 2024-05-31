@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"forum"
+	forum "forum/GO"
 )
 
 func main() {

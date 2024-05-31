@@ -1,65 +1,74 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #fffaee;
-    margin: 0;
-    padding: 0;
-}
+/* login.css */
 
+/* Style du container */
 .container {
     width: 50%;
-    margin: 50px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 10px;
+    background-color: #f8f8ff; /* Fond violet très clair */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Style du titre */
 h2 {
     text-align: center;
-    color: #d81d09; /* Couleur orange */
+    margin-bottom: 30px;
+    color: #4b0082; /* Indigo */
+    font-size: 2em;
+    font-weight: bold;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
+/* Style des étiquettes */
 label {
     display: block;
-    margin-bottom: 5px;
-    color: #333;
+    margin-bottom: 10px;
+    color: #4b0082; /* Indigo */
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
+/* Style des champs de saisie */
 input[type="email"],
 input[type="password"] {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 2px solid #4b0082; /* Indigo */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1.1em;
 }
 
-button[type="submit"] {
+/* Style du bouton */
+button {
     width: 100%;
-    padding: 10px;
-    background-color: #d81d09; /* Couleur orange */
-    color: #fff;
+    padding: 15px;
+    background-color: #4b0082; /* Indigo */
+    color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
-button[type="submit"]:hover {
-    background-color: #aa160c; /* Couleur orange plus foncée au survol */
+button:hover {
+    background-color: #3a006a; /* Indigo foncé */
 }
 
+/* Style du lien de création de compte */
 .link {
+    margin-top: 20px;
     text-align: center;
-    margin-top: 10px;
+    color: #333; /* Noir */
+    font-size: 0.9em;
 }
 
 .link a {
-    color: #007bff; /* Couleur bleue */
+    color: #4b0082; /* Indigo */
     text-decoration: none;
+    font-weight: bold;
 }
 
 .link a:hover {
