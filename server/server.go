@@ -8,7 +8,10 @@ import (
 
 func main() {
 	// Initialiser les tables de la base de données
-	forum.CreateTables()
+	forum.InitDB()
+
+	defer forum.DB.Close() // Fermer la base de données à la fin de l'exécution
+
 	
 	
 	// Servir les fichiers statiques du répertoire 'static'
