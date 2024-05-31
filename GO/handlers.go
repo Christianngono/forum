@@ -6,7 +6,9 @@ import (
 	"html/template"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -101,6 +103,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validation de la force du mot de passe
+	if !isPasswordStrong(user.Password) {
+		http.Error(w, "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial", http.StatusBadRequest)
+		return
+	}
+
 	// Hachage du mot de passe
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -173,4 +181,62 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	renderTemplate(w, "home.html", nil)
+}
+
+func isPasswordStrong(password string) bool {
+	// Vérifie si le mot de passe a au moins 8 caractères
+	if len(password) < 8 {
+		return false
+	}
+
+	// Vérifie s'il contient au moins une lettre majuscule
+	hasUppercase := false
+	for _, char := range password {
+		if unicode.IsUpper(char) {
+			hasUppercase = true
+			break
+		}
+	}
+	if !hasUppercase {
+		return false
+	}
+
+	// Vérifie s'il contient au moins une lettre minuscule
+	hasLowercase := false
+	for _, char := range password {
+		if unicode.IsLower(char) {
+			hasLowercase = true
+			break
+		}
+	}
+	if !hasLowercase {
+		return false
+	}
+
+	// Vérifie s'il contient au moins un chiffre
+	hasDigit := false
+	for _, char := range password {
+		if unicode.IsDigit(char) {
+			hasDigit = true
+			break
+		}
+	}
+	if !hasDigit {
+		return false
+	}
+
+	// Vérifie s'il contient au moins un caractère spécial
+	hasSpecialChar := false
+	specialChars := "!@#$%^&*()-_=+[]{}|;:',<.>/?"
+	for _, char := range password {
+		if strings.ContainsRune(specialChars, char) {
+			hasSpecialChar = true
+			break
+		}
+	}
+	if !hasSpecialChar {
+		return false
+	}
+
+	return true
 }

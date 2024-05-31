@@ -76,3 +76,21 @@ button:hover {
 .privacy a:hover {
     text-decoration: underline;
 }
+
+/* Ajoutez ces styles pour la case à cocher et son libellé */
+.privacy-checkbox {
+    margin-bottom: 20px;
+}
+
+.privacy-checkbox input[type="checkbox"] {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.privacy-checkbox label {
+    display: inline-block;
+    vertical-align: middle;
+    color: #4b0082;
+    font-size: 1em;
+}

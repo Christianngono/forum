@@ -1,0 +1,51 @@
+/* Style global */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8ff; /* Fond violet très clair */
+}
+
+/* Style de l'en-tête */
+header {
+    background-color: #4b0082; /* Indigo */
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+/* Style du contenu principal */
+main {
+    padding: 20px;
+}
+
+/* Style des sections */
+section {
+    margin-bottom: 30px;
+}
+
+section h2 {
+    color: #4b0082; /* Indigo */
+    font-size: 1.5em;
+}
+
+section p {
+    font-size: 1.1em;
+}
+
+/* Style du pied de page */
+footer {
+    background-color: #4b0082; /* Indigo */
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+footer p {
+    margin: 0;
+}

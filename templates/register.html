@@ -47,18 +47,21 @@
         <!-- Mot de passe -->
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
+        <div id="password-strength-meter"></div>
         <br>
 
         <!-- Confirmation du mot de passe -->
         <label for="confirmPassword">Confirm your password:</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required>
         <br>
-    
+        
+        <div class="privacy-checkbox">
+            <input type="checkbox" id="privacyCheckbox" required>
+            <label for="privacyCheckbox">I agree to the <a href="privacy_policy.html">privacy policy</a>.</label>
+        </div>
+
         <button type="submit">Register</button>
     </form>
     
-    <p class="privacy">By creating an account, you agree to our <a href=“Politique_De_Confidentialite.html”>privacy policy</a>.</p>
-</div>
-
 </body>
 </html>
