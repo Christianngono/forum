@@ -7,17 +7,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var db *sql.DB
+var DB *sql.DB
 
-func init() {
+func InitDB() {
 	var err error
-	db, err = sql.Open("sqlite3", "./forum.db")
+	DB, err = sql.Open("sqlite3", "./forum.db")
 	if err != nil {
 		log.Fatalf("Error opening database: %v\n", err)
 	}
+
+	err = CreateTables()
+	if err != nil {
+        log.Fatalf("Error creating tables: %v\n", err)
+    }
 }
 
-func CreateTables() {
+func CreateTables() error {
 	// Code pour créer les tables dans la base de données
 	createUsersTable := `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,41 +78,41 @@ func CreateTables() {
 		FOREIGN KEY (comment_id) REFERENCES comments(id)
 	);`
 
-	_, err := db.Exec(createUsersTable)
+	_, err := DB.Exec(createUsersTable)
 	if err != nil {
-		log.Fatalf("Error creating users table: %v\n", err)
+		return err
 	}
 
-	_, err = db.Exec(createPostsTable)
+	_, err = DB.Exec(createPostsTable)
 	if err != nil {
-		log.Fatalf("Error creating posts table: %v\n", err)
+		return err
 	}
 
-	_, err = db.Exec(createCommentsTable)
+	_, err = DB.Exec(createCommentsTable)
 	if err != nil {
-		log.Fatalf("Error creating comments table: %v\n", err)
+		return err
 	}
 
-	_, err = db.Exec(createCategoriesTable)
+	_, err = DB.Exec(createCategoriesTable)
 	if err != nil {
-		log.Fatalf("Error creating categories table: %v\n", err)
+		return err
 	}
 
-	_, err = db.Exec(createPostCategoriesTable)
+	_, err = DB.Exec(createPostCategoriesTable)
 	if err != nil {
-		log.Fatalf("Error creating post_categories table: %v\n", err)
+		return err
 	}
 
-	_, err = db.Exec(createLikesTable)
+	_, err = DB.Exec(createLikesTable)
 	if err != nil {
-		log.Fatalf("Error creating likes table: %v\n", err)
+		return err
 	}
 
-	_, err = db.Exec(createDislikesTable)
+	_, err = DB.Exec(createDislikesTable)
 	if err != nil {
-		log.Fatalf("Error creating dislikes table: %v\n", err)
+		return err
 	}
 
 	log.Println("Tables created")
-	db.Close()	
+	return nil	
 }
