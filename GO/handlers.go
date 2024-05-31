@@ -9,14 +9,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var db *sql.DB
-
-func SetDB(database *sql.DB) {
-	db = database
-}
 
 type User struct {
 	ID              int    `json:"id"`
@@ -31,13 +26,12 @@ type User struct {
 }
 
 var templates = template.Must(template.ParseFiles(
-	"templates/register.html",
-	"templates/login.html",
-	"templates/index.html",
-	"templates/create-post.html",
-	"templates/posts.html",
-	"templates/create-comment.html",
-	"templates/comments.html",
+	"../templates/home.html",
+	"../templates/register.html",
+	"../templates/login.html",
+	"../templates/create-post.html",
+	"../templates/posts.html",
+	"../templates/comments.html",
 ))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
@@ -45,6 +39,24 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "home.html", nil)
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Initialiser le store de session
+	var store = sessions.NewCookieStore([]byte("secret-key"))
+	session, err := store.Get(r, "session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer session.Save(r, w)
+
+	session.Options.MaxAge = -1
+	renderTemplate(w, "home.html", nil)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +126,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	// Code pour gérer la connexion
 	if r.Method != http.MethodPost {
 		renderTemplate(w, "login.html", nil)
 		return
@@ -131,7 +144,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = db.QueryRow("SELECT id, password FROM users WHERE email = ?", user.Email).Scan(&storedUser.ID, &storedUser.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Email ou mot de passe invalide", http.StatusUnauthorized)
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -140,16 +153,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
 	if err != nil {
-		http.Error(w, "Email ou mot de passe invalide", http.StatusUnauthorized)
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
+	// Generate a new session UUID
 	sessionID, err := uuid.NewRandom()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Store the session UUID in the cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_id",
 		Value:   sessionID.String(),
@@ -157,5 +172,5 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	renderTemplate(w, "home.html", storedUser)
+	renderTemplate(w, "home.html", nil)
 }

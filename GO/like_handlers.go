@@ -5,6 +5,16 @@ import (
 	"net/http"
 )
 
+type Like struct {
+	UserID int `json:"user_id"`
+	PostID int `json:"post_id"`
+}
+
+type Dislike struct {
+	UserID int `json:"user_id"`
+	PostID int `json:"post_id"`
+}
+
 // Handler pour gérer les likes sur les posts
 func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -12,10 +22,6 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type Like struct {
-		UserID int `json:"user_id"`
-		PostID int `json:"post_id"`
-	}
 	var like Like
 	err := json.NewDecoder(r.Body).Decode(&like)
 	if err != nil {
@@ -31,7 +37,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Render template for likes
-	renderTemplate(w, "templates/likes.html", nil) // Change "likes.html" to your actual template name
+	renderTemplate(w, "likes.html", nil) // Change "likes.html" to your actual template name
 }
 
 // Handler pour gérer les dislikes sur les posts
@@ -41,10 +47,6 @@ func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type Dislike struct {
-		UserID int `json:"user_id"`
-		PostID int `json:"post_id"`
-	}
 	var dislike Dislike
 	err := json.NewDecoder(r.Body).Decode(&dislike)
 	if err != nil {
@@ -60,5 +62,5 @@ func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Render template for dislikes
-	renderTemplate(w, "templates/dislikes.html", nil) // Change "dislikes.html" to your actual template name
+	renderTemplate(w, "dislikes.html", nil)
 }

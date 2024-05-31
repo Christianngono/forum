@@ -16,7 +16,7 @@ type Post struct {
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		renderTemplate(w, "templates/create-post.html", nil)
+		renderTemplate(w, "create-post.html", nil)
 		return
 	}
 
@@ -42,7 +42,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	renderTemplate(w, "templates/posts.html", post)
+	renderTemplate(w, "posts.html", nil)
 }
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,5 +63,5 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
-	renderTemplate(w, "templates/posts.html", posts)
+	renderTemplate(w, "posts.html", posts)
 }
