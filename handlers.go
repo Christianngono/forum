@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -58,12 +57,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
+	// Décoder le formulaire envoyé
+	user.Email = r.FormValue("email")
+	user.Username = r.FormValue("username")
+	user.Password = r.FormValue("password")
 
 	// Hash the password before storing it in the database
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -73,7 +70,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user.Password = string(hashedPassword)
 
-	stmt, err := db.Prepare("INSERT INTO users (email, username, password) VALUES (?,?,?)")
+	stmt, err := DB.Prepare("INSERT INTO users (email, username, password) VALUES (?,?,?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,7 +83,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	renderTemplate(w, "index.html", nil)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully"})
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -96,16 +93,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
+	// Lire les données du formulaire
+	email := r.FormValue("email")
+	password := r.FormValue("password")
 
-	var storedUser User
-	err = db.QueryRow("SELECT id, password FROM users WHERE email = ?", user.Email).Scan(&storedUser.ID, &storedUser.Password)
+	var user User
+	err := DB.QueryRow("SELECT id, email, username, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
@@ -115,26 +108,32 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
+	// Comparer les mots de passe 
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
-	// Generate a new session UUID
-	sessionID, err := uuid.NewRandom()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// Create a new session UUID
+	sessionID := uuid.New().String()
 
-	// Store the session UUID in the cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session_id",
-		Value:   sessionID.String(),
-		Expires: time.Now().Add(24 * time.Hour),
-	})
 
-	w.WriteHeader(http.StatusOK)
-	renderTemplate(w, "index.html", nil)
+	// Initialiser le store de session
+	var store =sessions.NewCookieStore([]byte("secret-key"))
+	session, err := store.Get(r, "session")
+	if err!= nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+	// Stocker l'ID de session dans les valeurs de session
+	session.Values["user_id"] = user.ID
+	session.Values["username"] = user.Username
+	session.Values["email"] = user.Email
+	session.Values["session_id"] = sessionID
+	session.Save(r, w)
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User logged in successfully"})
 }
