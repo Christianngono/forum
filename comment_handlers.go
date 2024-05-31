@@ -29,7 +29,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	stmt, err := db.Prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -48,7 +48,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour récupérer les commentaires
-	rows, err := db.Query("SELECT id, post_id, user_id, content, created_at FROM comments")
+	rows, err := DB.Query("SELECT id, post_id, user_id, content, created_at FROM comments")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
