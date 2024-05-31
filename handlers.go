@@ -24,6 +24,7 @@ var templates = template.Must(template.ParseFiles("../templates/index.html",
 	"../templates/create-post.html",
 	"../templates/posts.html",
 	"../templates/comments.html",
+	"../templates/create-comment.html",
 ))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
