@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -24,39 +23,52 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log pour débogage
+	// Parse the form data
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+	}
+
+	// Log the form values for debugging
 	log.Println("Form Values:", r.Form)
 
+	
+
+	// Get post _id form the form values
 	postIDStr := r.FormValue("post_id")
 	log.Println("Received post_id:", postIDStr)
-
-	// Lire les données
-	postID, err := strconv.Atoi(r.FormValue("post_id"))
+	postID, err := strconv.Atoi(postIDStr)
 	if err != nil || postID <= 0 {
 		log.Println("Invalid post_id:", postIDStr)
 		http.Error(w, "Invalid post_id", http.StatusBadRequest)
 		return
 	}
+
+    // Get user_id form form values
+	userIDStr := r.FormValue("user_id")
+	log.Println("Received user_id:", userIDStr)
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil || userID <= 0 {
+		log.Println("Invalid user_id:", userIDStr)
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
 	// Valider si le post_id existe
-	var exists sql.NullBool
+	var exists bool
 	err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM posts WHERE id = ?)", postID).Scan(&exists)
 	if err != nil {
 		log.Println("Database error:", err)
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
-	if !exists.Valid || !exists.Bool {
+	if !exists {
 		log.Println("Post not found:", postID)
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
-	userID, err := strconv.Atoi(r.FormValue("user_id"))
-	if err != nil || userID <= 0 {
-		log.Println("Invalid user_id:", r.FormValue("user_id"))
-		http.Error(w, "Invalid user_id", http.StatusBadRequest)
-		return
-	}
-
+	
 	comment := Comment{
 		PostID:    postID,
 		UserID:    userID,
@@ -104,4 +116,26 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comments)
+}
+
+func GetCommentHandler(w http.ResponseWriter, r *http.Request) {
+	// Code pour récupérer un commentaire
+    commentIDStr := r.URL.Query().Get("id")
+    log.Println("Received comment_id:", commentIDStr)
+    commentID, err := strconv.Atoi(commentIDStr)
+    if err != nil || commentID <= 0 {
+        log.Println("Invalid comment_id:", commentIDStr)
+        http.Error(w, "Invalid comment_id", http.StatusBadRequest)
+        return
+    }
+
+    var comment Comment
+    err = DB.QueryRow("SELECT id, post_id, user_id, content, created_at FROM comments WHERE id = ?", commentID).Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt)
+	if err != nil {
+        log.Println("Database error:", err)
+        http.Error(w, "Database error", http.StatusInternalServerError)
+        return
+    }
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comment)
 }
