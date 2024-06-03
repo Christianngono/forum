@@ -3,6 +3,7 @@ package forum
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -64,5 +65,22 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 	renderTemplate(w, "posts.html", posts)
+}
+
+func GetPostHandler(w http.ResponseWriter, r *http.Request) {
+	postIDStr := r.URL.Query().Get("id")
+    postID, err := strconv.Atoi(postIDStr)
+    if err!= nil || postID <= 0 {
+        http.Error(w, "Invalid post_id", http.StatusBadRequest)
+        return
+    }
+
+    var post Post
+    err = DB.QueryRow("SELECT id, user_id, title, content, created_at FROM posts WHERE id =?", postID).Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.CreatedAt)
+    if err!= nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    renderTemplate(w, "post.html", post)
 }
 
