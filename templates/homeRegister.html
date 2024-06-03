@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Forum</title>
-    <link rel="stylesheet" href="../CSS/home.css">
+    <link rel="stylesheet" href="../CSS/homeRegister.css">
 </head>
 <body>
     <header>
@@ -19,29 +19,21 @@
             <div class="header-right">
                 <img src="../IMAGE/Avatar 0.jpg" alt="Avatar" class="avatar" id="profileAvatar">
             </div>
-            <nav>
-                <ul>
-                    <li><a href="register.html">Register</a></li>
-                    <li><a href="login.html">Login</a></li>
-                </ul>
-            </nav>
+            
         </div>
     </header>
 
     <main>
         <div class="container">
-            <h2>Last Posts</h2>
+            <h2>Last posts</h2>
+            {{range .Posts}}
             <div class="post">
-                <h3>Legalization of firearms</h3>
-                <p>here you can discuss the legalization of firearms in the united states and in your country.</p>
+                <h3>{{.Title}}</h3>
+                <p>{{.Content}}</p>
+                <p><small>Posted by {{.UserID}} the {{.CreatedAt}}</small></p>
                 <p><a href="#">Lire la suite...</a></p>
             </div>
-            <div class="post">
-                <h3>Titre du Post 2</h3>
-                <p>Ceci est le contenu du post 2. Il peut inclure des commentaires et des interactions entre utilisateurs.</p>
-                <p><a href="#">Lire la suite...</a></p>
-            </div>
-            <!-- Ajoutez plus de posts ici -->
+            {{end}}
         </div>
     </main>
 

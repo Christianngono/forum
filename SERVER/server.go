@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func main() {
+func server() {
 	// Initialiser les tables de la base de données
 	forum.CreateTables()
 

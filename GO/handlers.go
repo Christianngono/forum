@@ -44,7 +44,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home.html", nil)
+	renderTemplate(w, "../templates/home.html", nil)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +130,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "login.html", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
