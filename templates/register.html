@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="../CSS/register.css">
+</head>
+<body>
+<div class="container">
+    <h1>Create account</h1>
+    <form action="/register" method="POST">
+        <!-- Genre -->
+        <label for="genre">Gender:</label>
+        <select id="genre" name="genre">
+            <option value="homme">Man</option>
+            <option value="femme">Women</option>
+            <option value="autre">Other</option>
+        </select>
+        <br>
+    
+        <!-- Nom -->
+        <label for="nom">Name:</label>
+        <input type="text" id="nom" name="nom" required>
+        <br>
+    
+        <!-- Prénom -->
+        <label for="prenom">FirstName:</label>
+        <input type="text" id="prenom" name="prenom" required>
+        <br>
+    
+        <!-- Date de naissance -->
+        <label for="dateNaissance">Date of birth:</label>
+        <input type="date" id="dateNaissance" name="dateNaissance" required>
+        <br>
+    
+        <!-- Adresse e-mail -->
+        <label for="email">E-mail address:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+       
+        <!-- Numéro de téléphone -->
+        <label for="telephone">Phone number:</label>
+        <input type="tel" id="telephone" name="telephone" pattern="[0-9]{10}" required>
+        <br>
+
+        <!-- Mot de passe -->
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <div id="password-strength-meter"></div>
+        <br>
+
+        <!-- Confirmation du mot de passe -->
+        <label for="confirmPassword">Confirm your password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+        <br>
+        
+        <div class="privacy-checkbox">
+            <input type="checkbox" id="privacyCheckbox" required>
+            <label for="privacyCheckbox">I agree to the <a href="privacy_policy.html">privacy policy</a>.</label>
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+    
+</body>
+</html>

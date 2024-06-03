@@ -1,75 +1,170 @@
+/* home.css */
+
+/* Style global */
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8ff; /* Fond violet très clair */
 }
 
+/* Style du container */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Style de l'en-tête */
 header {
-    background-color: #48104c;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.left-elements, .right-elements {
-    display: flex;
-    align-items: center;
-}
-
-.right-elements img{
-    width: 70px;
-    border-radius: 60%;
-}
-
-.left-elements img {
-    width: 200px;
-    border-radius: 60%;
-}
-
-.center-elements h1 {
+    background-color: #4b0082; /* Indigo */
+    color: white;
+    padding: 20px 0;
     text-align: center;
-    color: #fb00ff; 
+    position: relative; /* Ajout */
 }
 
-.button {
-    margin: 10px;
-    background-color: #621468;;
-    color: #fb00ff;
-    padding: 10px 0px;
-    border: none;
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+header p {
+    color: #fff; /* Couleur du texte */
+    font-size: 1.2em; /* Taille de la police */
+    margin-bottom: 20px; /* Marge en bas */
+    margin-left: 100px; /* Décalage vers la droite */
+}
+
+/* Style du logo */
+.header-left {
+    position: absolute;
+    top: 10px; /* Ajustez selon votre préférence */
+    left: 10px; /* Ajustez selon votre préférence */
+}
+
+.logo {
+    width: 200px; /* Ajustez selon votre préférence */
+    border-radius: 50%; /* Rendre l'avatar rond */
+    border: 2px solid white; /* Ajout */
+}
+
+/* Style du profil */
+.header-right {
+    position: absolute;
+    top: 10px; /* Ajustez selon votre préférence */
+    right: 10px; /* Ajustez selon votre préférence */
+}
+
+.avatar {
+    width: 50px; /* Ajustez selon votre préférence */
+    height: 50px; /* Ajustez selon votre préférence */
+    border-radius: 50%; /* Rendre l'avatar rond */
+    border: 2px solid white; /* Ajout */
+}
+
+nav {
+    margin-left: 0px; /* Ajustez selon votre préférence */
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 10px;
+}
+
+nav ul li a {
+    color: white;
     text-decoration: none;
-    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: color 0.3s ease; /* Transition sur la couleur pendant 0.3s */
+}
+
+nav ul li a:hover {
+    color: #d4af37; /* Nouvelle couleur au survol */
+}
+
+
+
+@keyframes moveLeftToRight {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Appliquez l'animation au texte */
+.welcome-text {
+    animation: moveLeftToRight 5s linear infinite alternate; /* Animation pour déplacer de gauche à droite et vice versa en boucle */
+}
+
+.post {
+    transition: transform 0.3s ease; /* Transition sur la transformation pendant 0.3s */
+}
+
+.post:hover {
+    transform: scale(1.05); /* Zoom au survol */
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.post {
+    animation: fadeIn 1s ease; /* Animation de fondu en entrée pendant 1s */
+}
+
+
+
+/* Style des posts */
+.post {
+    background-color: white;
+    border: 2px solid #4b0082; /* Indigo */
     border-radius: 5px;
-    width: 150px; 
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.button:hover {
-    background-color: #ff002f;
-  }
-
-main {
-    display: flex;
-    flex-direction: column; 
-    align-items: center; 
-    margin-top: 20px; 
+.post h3 {
+    color: #4b0082; /* Indigo */
+    margin-top: 0;
 }
 
-.left-section, .right-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 0px; /
+.post p {
+    color: #333; /* Noir */
+    font-size: 1em;
 }
 
-.left-section img, .right-section img {
-    width: 10%; 
-    height: auto;
+.post a {
+    color: #4b0082; /* Indigo */
+    text-decoration: none;
 }
 
+.post a:hover {
+    text-decoration: underline;
+}
+
+/* Style du pied de page */
 footer {
-    background-color: #48104c;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start; 
+    background-color: #4b0082; /* Indigo */
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+footer p {
+    margin: 0;
 }
