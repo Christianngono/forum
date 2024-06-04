@@ -3,6 +3,7 @@ package forum
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -28,7 +29,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	stmt, err := db.Prepare("INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -46,7 +47,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, user_id, title, content, created_at FROM posts")
+	rows, err := DB.Query("SELECT id, user_id, title, content, created_at FROM posts")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,4 +65,21 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 	renderTemplate(w, "posts.html", posts)
+}
+
+func GetPostHandler(w http.ResponseWriter, r *http.Request) {
+	postIDStr := r.URL.Query().Get("id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil || postID <= 0 {
+		http.Error(w, "Invalid post_id", http.StatusBadRequest)
+		return
+	}
+
+	var post Post
+	err = DB.QueryRow("SELECT id, user_id, title, content, created_at FROM posts WHERE id =?", postID).Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.CreatedAt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	renderTemplate(w, "post.html", post)
 }

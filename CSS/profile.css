@@ -4,7 +4,7 @@ body {
 }
 
 header {
-    background-color: #fffaee;
+    background-color: #4b0082;
     padding: 20px;
     display: flex;
     align-items: center;
@@ -12,7 +12,7 @@ header {
 }
 
 h1 {
-    color: #d81d09;
+    color: #ffffff;
 }
 
 .left-elements, .right-elements {
@@ -30,12 +30,12 @@ h1 {
 
 .left-elements h1 {
     margin-left: 350px;
-    color: #d81d09; 
+    color: #4b0082; 
 }
 
 .button {
     margin: 10px;
-    background-color: #ee871e;
+    background-color: #4b0082;
     color: #fffaee;
     padding: 10px 0px;
     border: none;
@@ -46,7 +46,7 @@ h1 {
 }
 
 .button:hover {
-    background-color: #d81d09;
+    background-color: #d4af37;
 }
 
 main {
@@ -82,7 +82,7 @@ main {
 
 .edit-profile a {
     display: inline-block;
-    background-color: #d81d09;
+    background-color: #4b0082;
     color: #fff;
     padding: 10px 20px;
     text-decoration: none;
@@ -90,12 +90,12 @@ main {
 }
 
 .edit-profile a:hover {
-    background-color: #ee871e;
+    background-color: #d4af37;
 }
 
 
 .edit-profile a:hover {
-    background-color: #ee871e;
+    background-color: #d4af37;
 }
 
 
