@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -34,13 +35,24 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	}
 }
 
+func getSessionStore() *sessions.CookieStore {
+	// Charger la clé secrète à partir des variables d'environnement
+	secretKey := os.Getenv("SESSION_SECRET_KEY")
+	if secretKey == "" {
+		// Si la clé n'est pas définie, retourner une erreur (ou utiliser une clé par défaut pour le développement)
+		secretKey = "default-secret-key" // A remplacer par une vraie clé en production
+	}
+	return sessions.NewCookieStore([]byte(secretKey))
+}
+
+
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "index.html", nil)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Initialiser le store de session
-	var store = sessions.NewCookieStore([]byte("secret-key"))
+	store := getSessionStore()
 	session, err := store.Get(r, "session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -121,12 +133,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 
 	// Initialiser le store de session
-	var store =sessions.NewCookieStore([]byte("secret-key"))
+	store := getSessionStore()
 	session, err := store.Get(r, "session")
 	if err!= nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+
 
 	// Stocker l'ID de session dans les valeurs de session
 	session.Values["user_id"] = user.ID
