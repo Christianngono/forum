@@ -44,9 +44,10 @@ func getSessionStore() *sessions.CookieStore {
 	secretKey := os.Getenv("SESSION_SECRET_KEY")
 	if secretKey == "" {
 		// Si la clé n'est pas définie, retourner une erreur (ou utiliser une clé par défaut pour le développement)
-		secretKey = "default-secret-key" // A remplacer par une vraie clé en production
+		// A remplacer par une vraie clé en production
+		secretKey = "default-secret-key" 
 	}
-	return sessions.NewCookieStore([]byte(secretKey))
+	return sessions.NewCookieStore([]byte(secretKey))	
 }
 
 
@@ -127,7 +128,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Crée un nouvel UUID de session
+	// Créer une sessionID à l' UUID 
 	sessionID := uuid.New().String()
 
 
