@@ -7,9 +7,26 @@
     <link rel="stylesheet" href="/static/css/index.css">
 </head>
 <body>
-    <h1>Welcome to the Forum</h1>
-    <div class="container">
-    <a href="/register">Register</a> | <a href="/login">Login</a>
-    </div>
+    <header>
+        <h1>Welcome to the Forum</h1>
+        <nav>
+            <a href="/register">Register</a>
+            <a href="/login">Login</a>
+            <a href="/create-post">Create a new post</a>
+            <a href="/get-posts">View posts</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Latest Posts</h2>
+        <div id="posts">
+            {{range .}}
+            <div class="post">
+                <h3>{{.Title}}</h3>
+                <p>{{.Content}}</p>
+                <a href="/get-post?id={{.ID}}">Read More</a>
+            </div>
+            {{end}}
+        </div>   
+    </main>
 </body>
 </html>
