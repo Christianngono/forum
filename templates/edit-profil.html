@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier Profil</title>
+    <title>Edit Profil</title>
     <link rel="stylesheet" href="../CSS/edit-profile.css">
 </head>
 <body>
     <header>
-        <h1>Modifier le profil</h1>
+        <h1>Edit the profil</h1>
     </header>
     <main>
         <div class="user-info-container">
             <div class="profile-info">
                 <div class="avatar">
-                    <img id="avatarPreview" src="../IMAGE/Avatar 0.jpg" alt="Avatar de l'utilisateur">
+                    <img id="avatarPreview" src="../IMAGE/Avatar 0.jpg" alt="Avatar de l'utilisateur"> // a changer pour que l'utilisateur choisisse dans ses dossiers
                 </div>
                 <form id="editProfileForm">
                     <div class="form-group">
-                        <label for="firstName">Nom d'utilisateur</label>
+                        <label for="firstName">Pseudo</label>
                         <input type="text" id="firstName" name="firstName" value="Utilisateur" required>
                     </div>
                     <div class="form-group">
@@ -26,28 +26,28 @@
                         <input type="email" id="email" name="email" value="utilisateur@example.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Numéro de téléphone</label>
+                        <label for="phone">Telephone number</label>
                         <input type="tel" id="phone" name="phone" value="+33612345678" required>
                     </div>
                     <div class="form-group">
-                        <label for="avatar">Choisir un avatar:</label>
+                        <label for="avatar">Chose a picture</label>
                         <select id="avatar" name="avatar">
 
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="password">Nouveau Mot de Passe:</label>
+                        <label for="password">New password:</label>
                         <input type="password" id="password" name="password" required>
                     </div>
                     <div class="form-group">
-                        <label for="confirmPassword">Confirmer le Nouveau Mot de Passe:</label>
+                        <label for="confirmPassword">Confirm the new password:</label>
                         <input type="password" id="confirmPassword" name="confirmPassword" required>
                     </div>
-                    <button type="submit">Enregistrer</button>
+                    <button type="submit">Submit</button>
                 </form>
             </div>
             <div class="edit-profile">
-                <a href="../templates/profile.html">Annuler</a>
+                <a href="../templates/profile.html">Cancel</a>
             </div>
         </div>
     </main>
