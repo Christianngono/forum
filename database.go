@@ -16,13 +16,6 @@ func InitDB() {
 		log.Fatalf("Error opening database: %v\n", err)
 	}
 
-	err = CreateTables()
-	if err != nil {
-        log.Fatalf("Error creating tables: %v\n", err)
-    }
-}
-
-func CreateTables() error {
 	// Code pour créer les tables dans la base de données
 	createUsersTable := `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,41 +71,21 @@ func CreateTables() error {
 		FOREIGN KEY (comment_id) REFERENCES comments(id)
 	);`
 
-	_, err := DB.Exec(createUsersTable)
-	if err != nil {
-		return err
+	statements := []string {
+		createUsersTable,
+        createPostsTable,
+        createCommentsTable,
+        createCategoriesTable,
+        createPostCategoriesTable,
+        createLikesTable,
+        createDislikesTable,
 	}
 
-	_, err = DB.Exec(createPostsTable)
-	if err != nil {
-		return err
+	for _, statement := range statements {
+		_, err = DB.Exec(statement)
+        if err!= nil {
+            log.Fatalf("Error creating tables: %v\n", err)
+        }
+		log.Printf("Created table: %s", statement)
 	}
-
-	_, err = DB.Exec(createCommentsTable)
-	if err != nil {
-		return err
-	}
-
-	_, err = DB.Exec(createCategoriesTable)
-	if err != nil {
-		return err
-	}
-
-	_, err = DB.Exec(createPostCategoriesTable)
-	if err != nil {
-		return err
-	}
-
-	_, err = DB.Exec(createLikesTable)
-	if err != nil {
-		return err
-	}
-
-	_, err = DB.Exec(createDislikesTable)
-	if err != nil {
-		return err
-	}
-
-	log.Println("Tables created")
-	return nil	
 }
