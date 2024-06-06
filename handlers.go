@@ -26,6 +26,10 @@ var templates = template.Must(template.ParseFiles("../templates/index.html",
 	"../templates/posts.html",
 	"../templates/comments.html",
 	"../templates/create-comment.html",
+	"../templates/post.html",
+    "../templates/comment.html",
+    "../templates/likes.html",
+    "../templates/dislikes.html",
 ))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
@@ -51,17 +55,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Initialiser le store de session
 	store := getSessionStore()
-	session, err := store.Get(r, "session")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer session.Save(r, w)
-
-	session.Options.MaxAge = -1
-	renderTemplate(w, "index.html", nil)
+	session, _ := store.Get(r, "session")
+	delete(session.Values, "user_id")
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +73,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	user.Username = r.FormValue("username")
 	user.Password = r.FormValue("password")
 
-	// Hash the password before storing it in the database
+	// Hacher le mot de passe avant de le stocker dans la base de données
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -97,6 +95,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully"})
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +127,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a new session UUID
+	// Crée un nouvel UUID de session
 	sessionID := uuid.New().String()
 
 
