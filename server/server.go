@@ -12,7 +12,9 @@ func init() {
 	err := godotenv.Load("/home/christian/forum/forum/server/session_secret.env")
     if err!= nil {
         log.Fatal("Error loading.env file")
-    }
+    } else {
+		log.Println("Loaded.env file")
+	}
 }
 
 func main() {
