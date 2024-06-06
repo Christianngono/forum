@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	err := godotenv.Load()
+	err := godotenv.Load("/home/christian/forum/forum/server/session_secret.env")
     if err!= nil {
         log.Fatal("Error loading.env file")
     }
@@ -18,8 +18,8 @@ func init() {
 func main() {
 	// Initialiser les tables de la base de données
 	forum.InitDB()
-
-	defer forum.DB.Close() // Fermer la base de données à la fin de l'exécution
+    // Fermer la base de données à la fin de l'exécution
+	defer forum.DB.Close() 
 
 	
 	
