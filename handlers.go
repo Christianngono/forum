@@ -54,7 +54,7 @@ func getSessionStore() *sessions.CookieStore {
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "index.html", nil)
+	renderTemplate(w, "home.html", nil)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
