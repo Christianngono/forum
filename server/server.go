@@ -4,15 +4,15 @@ import (
 	"forum"
 	"log"
 	"net/http"
-	"github.com/joho/godotenv"
 
+	"github.com/joho/godotenv"
 )
 
 func init() {
-	err := godotenv.Load("/home/christian/forum/forum/server/session_secret.env")
-    if err!= nil {
-        log.Fatal("Error loading.env file")
-    } else {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatal("Error loading.env file")
+	} else {
 		log.Println("Loaded.env file")
 	}
 }
@@ -20,11 +20,9 @@ func init() {
 func main() {
 	// Initialiser les tables de la base de données
 	forum.InitDB()
-    // Fermer la base de données à la fin de l'exécution
-	defer forum.DB.Close() 
+	// Fermer la base de données à la fin de l'exécution
+	defer forum.DB.Close()
 
-	
-	
 	// Servir les fichiers statiques du répertoire 'static'
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -42,4 +40,3 @@ func main() {
 	log.Println("Server started on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-
