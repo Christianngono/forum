@@ -26,18 +26,29 @@
 
     <main>
         <div class="container">
-            <h2>Last posts</h2>
-            {{range .Posts}}
-            <div class="post">
-                <h3>{{.Title}}</h3>
-                <p>{{.Content}}</p>
-                <p><small>Posted by {{.UserID}} the {{.CreatedAt}}</small></p>
-                <p><a href="posts.html">Lire la suite...</a></p>
+            <form action="/search" method="GET">
+                <input type="text" name="query" placeholder="Search for posts...">
+                <button type="submit">Search</button>
+            </form>
+            <button onclick="window.location.href='create-post.html'">Create Post</button>
+            
+            <h2>Recent Posts</h2>
+            <div id="recent-posts">
+                <!-- Placeholder for recent posts -->
+                <div class="post">
+                    <h3>Legalization of firearms</h3>
+                    <p>Here you can discuss the legalization of firearms in the United States and in your country.</p>
+                    <p><a href="/post?id=1">Read more...</a></p>
+                </div>
+                <div class="post">
+                    <h3>Trump</h3>
+                    <p>The future of the United States and the world.</p>
+                    <p><a href="/post?id=2">Read more...</a></p>
+                </div>
             </div>
-            {{end}}
         </div>
     </main>
-
+    
     <footer>
         <div class="container">
             <p>&copy; 2024 Forum. All rights reserved.</p>
