@@ -19,7 +19,8 @@ type User struct {
 	Password string `json:"password"`
 }
 
-var templates = template.Must(template.ParseFiles("../templates/index.html",
+var templates = template.Must(template.ParseFiles("../templates/home.html",
+	"../templates/homeRegister.html",
 	"../templates/register.html",
 	"../templates/login.html",
 	"../templates/create-post.html",
@@ -30,6 +31,8 @@ var templates = template.Must(template.ParseFiles("../templates/index.html",
 	"../templates/comment.html",
 	"../templates/likes.html",
 	"../templates/dislikes.html",
+	"../templates/edit-profil.html",
+	"../templates/profil.html",
 ))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
