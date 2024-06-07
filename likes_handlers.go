@@ -1,15 +1,9 @@
 package forum
 
 import (
-	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
-
-	_ "github.com/mattn/go-sqlite3"
 )
-
-var db *sql.DB
 
 type Like struct {
 	UserID int `json:"user_id"`
@@ -19,21 +13,6 @@ type Like struct {
 type Dislike struct {
 	UserID int `json:"user_id"`
 	PostID int `json:"post_id"`
-}
-
-// Initialisation de la connexion à la base de données
-func init() {
-	var err error
-	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/dbname")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Vérifiez la connexion
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 // Handler pour gérer les likes sur les posts
@@ -51,7 +30,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	_, err = db.Exec("INSERT INTO likes (user_id, post_id) VALUES (?, ?)", like.UserID, like.PostID)
+	_, err = DB.Exec("INSERT INTO likes (user_id, post_id) VALUES (?, ?)", like.UserID, like.PostID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -76,7 +55,7 @@ func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	_, err = db.Exec("INSERT INTO dislikes (user_id, post_id) VALUES (?, ?)", dislike.UserID, dislike.PostID)
+	_, err = DB.Exec("INSERT INTO dislikes (user_id, post_id) VALUES (?, ?)", dislike.UserID, dislike.PostID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

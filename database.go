@@ -11,7 +11,7 @@ var DB *sql.DB
 
 func InitDB() {
 	var err error
-	DB, err = sql.Open("go-sqlite3", "user:password@tcp(127.0.0.1:3306)/dbname") // remplacé ça "./forum.db" par ça user:password@tcp(127.0.0.1:3306)/dbname. A rechangé peut etre
+	DB, err = sql.Open("sqlite3", "./forum.db")
 	if err != nil {
 		log.Fatalf("Error opening database: %v\n", err)
 	}
