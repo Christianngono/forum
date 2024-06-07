@@ -23,17 +23,17 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the form data
+	// Analyser les données du formulaire
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Log the form values for debugging
+	// Enregistrez les valeurs du formulaire pour le débogage
 	log.Println("Form Values:", r.Form)
 
-	// Get post _id form the form values
+	// Récupérer le post_id des valeurs du formulaire
 	postIDStr := r.FormValue("post_id")
 	log.Println("Received post_id:", postIDStr)
 	postID, err := strconv.Atoi(postIDStr)
@@ -43,7 +43,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user_id form form values
+	// Obtenir user_id à partir des valeurs du formulaire
 	userIDStr := r.FormValue("user_id")
 	log.Println("Received user_id:", userIDStr)
 	userID, err := strconv.Atoi(userIDStr)

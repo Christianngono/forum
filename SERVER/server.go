@@ -4,11 +4,24 @@ import (
 	"forum"
 	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
-func server() {
+func init() {
+	err := godotenv.Load("/home/christian/forum/forum/server/session_secret.env")
+	if err != nil {
+		log.Fatal("Error loading.env file")
+	} else {
+		log.Println("Loaded.env file")
+	}
+}
+
+func main() {
 	// Initialiser les tables de la base de données
-	forum.CreateTables()
+	forum.InitDB()
+	// Fermer la base de données à la fin de l'exécution
+	defer forum.DB.Close()
 
 	// Servir les fichiers statiques du répertoire 'static'
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))

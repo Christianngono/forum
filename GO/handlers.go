@@ -5,10 +5,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
-	"regexp"
-	"strings"
-	"time"
-	"unicode"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -16,24 +13,23 @@ import (
 )
 
 type User struct {
-	ID              int    `json:"id"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmPassword"`
-	Genre           string `json:"genre"`
-	Nom             string `json:"nom"`
-	Prenom          string `json:"prenom"`
-	DateNaissance   string `json:"dateNaissance"`
-	Telephone       string `json:"telephone"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
-var templates = template.Must(template.ParseFiles(
-	"../templates/home.html",
+var templates = template.Must(template.ParseFiles("../templates/index.html",
 	"../templates/register.html",
 	"../templates/login.html",
 	"../templates/create-post.html",
 	"../templates/posts.html",
 	"../templates/comments.html",
+	"../templates/create-comment.html",
+	"../templates/post.html",
+	"../templates/comment.html",
+	"../templates/likes.html",
+	"../templates/dislikes.html",
 ))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
@@ -43,22 +39,27 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	}
 }
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "../templates/home.html", nil)
+func getSessionStore() *sessions.CookieStore {
+	// Charger la clé secrète à partir des variables d'environnement
+	secretKey := os.Getenv("SESSION_SECRET_KEY")
+	if secretKey == "" {
+		// Si la clé n'est pas définie, retourner une erreur (ou utiliser une clé par défaut pour le développement)
+		// A remplacer par une vraie clé en production
+		secretKey = "default-secret-key"
+	}
+	return sessions.NewCookieStore([]byte(secretKey))
+}
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "index.html", nil)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Initialiser le store de session
-	var store = sessions.NewCookieStore([]byte("secret-key"))
-	session, err := store.Get(r, "session")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer session.Save(r, w)
-
-	session.Options.MaxAge = -1
-	renderTemplate(w, "home.html", nil)
+	store := getSessionStore()
+	session, _ := store.Get(r, "session")
+	delete(session.Values, "user_id")
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,50 +67,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "register.html", nil)
 		return
 	}
-
 	var user User
+	// Décoder le formulaire envoyé
 	user.Email = r.FormValue("email")
+	user.Username = r.FormValue("username")
 	user.Password = r.FormValue("password")
-	user.ConfirmPassword = r.FormValue("confirmPassword")
-	user.Genre = r.FormValue("genre")
-	user.Nom = r.FormValue("nom")
-	user.Prenom = r.FormValue("prenom")
-	user.DateNaissance = r.FormValue("dateNaissance")
-	user.Telephone = r.FormValue("telephone")
 
-	// Vérifier que les mots de passe correspondent
-	if user.Password != user.ConfirmPassword {
-		http.Error(w, "Les mots de passe ne correspondent pas", http.StatusBadRequest)
-		return
-	}
-
-	// Vérification de l'âge
-	birthDate, err := time.Parse("2006-01-02", user.DateNaissance)
-	if err != nil {
-		http.Error(w, "Date de naissance invalide", http.StatusBadRequest)
-		return
-	}
-
-	age := time.Now().Sub(birthDate).Hours() / 24 / 365
-	if age < 16 {
-		http.Error(w, "Vous devez avoir au moins 16 ans pour vous inscrire", http.StatusBadRequest)
-		return
-	}
-
-	// Vérification du numéro de téléphone
-	phoneRegex := regexp.MustCompile(`^\d{10}$`)
-	if !phoneRegex.MatchString(user.Telephone) {
-		http.Error(w, "Numéro de téléphone invalide", http.StatusBadRequest)
-		return
-	}
-
-	// Validation de la force du mot de passe
-	if !isPasswordStrong(user.Password) {
-		http.Error(w, "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial", http.StatusBadRequest)
-		return
-	}
-
-	// Hachage du mot de passe
+	// Hacher le mot de passe avant de le stocker dans la base de données
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,20 +81,21 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user.Password = string(hashedPassword)
 
-	stmt, err := db.Prepare("INSERT INTO users (email, password, genre, nom, prenom, dateNaissance, telephone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO users (email, username, password) VALUES (?,?,?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Email, user.Password, user.Genre, user.Nom, user.Prenom, user.DateNaissance, user.Telephone)
+	_, err = stmt.Exec(user.Email, user.Username, user.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	http.Redirect(w, r, "login.html", http.StatusSeeOther)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully"})
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -140,16 +105,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
+	// Lire les données du formulaire
+	email := r.FormValue("email")
+	password := r.FormValue("password")
 
-	var storedUser User
-	err = db.QueryRow("SELECT id, password FROM users WHERE email = ?", user.Email).Scan(&storedUser.ID, &storedUser.Password)
+	var user User
+	err := DB.QueryRow("SELECT id, email, username, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
@@ -159,84 +120,31 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
+	// Comparer les mots de passe
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
-	// Generate a new session UUID
-	sessionID, err := uuid.NewRandom()
+	// Créer une sessionID à l' UUID
+	sessionID := uuid.New().String()
+
+	// Initialiser le store de session
+	store := getSessionStore()
+	session, err := store.Get(r, "session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Store the session UUID in the cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session_id",
-		Value:   sessionID.String(),
-		Expires: time.Now().Add(24 * time.Hour),
-	})
+	// Stocker l'ID de session dans les valeurs de session
+	session.Values["user_id"] = user.ID
+	session.Values["username"] = user.Username
+	session.Values["email"] = user.Email
+	session.Values["session_id"] = sessionID
+	session.Save(r, w)
 
-	w.WriteHeader(http.StatusOK)
-	renderTemplate(w, "home.html", nil)
-}
-
-func isPasswordStrong(password string) bool {
-	// Vérifie si le mot de passe a au moins 8 caractères
-	if len(password) < 8 {
-		return false
-	}
-
-	// Vérifie s'il contient au moins une lettre majuscule
-	hasUppercase := false
-	for _, char := range password {
-		if unicode.IsUpper(char) {
-			hasUppercase = true
-			break
-		}
-	}
-	if !hasUppercase {
-		return false
-	}
-
-	// Vérifie s'il contient au moins une lettre minuscule
-	hasLowercase := false
-	for _, char := range password {
-		if unicode.IsLower(char) {
-			hasLowercase = true
-			break
-		}
-	}
-	if !hasLowercase {
-		return false
-	}
-
-	// Vérifie s'il contient au moins un chiffre
-	hasDigit := false
-	for _, char := range password {
-		if unicode.IsDigit(char) {
-			hasDigit = true
-			break
-		}
-	}
-	if !hasDigit {
-		return false
-	}
-
-	// Vérifie s'il contient au moins un caractère spécial
-	hasSpecialChar := false
-	specialChars := "!@#$%^&*()-_=+[]{}|;:',<.>/?"
-	for _, char := range password {
-		if strings.ContainsRune(specialChars, char) {
-			hasSpecialChar = true
-			break
-		}
-	}
-	if !hasSpecialChar {
-		return false
-	}
-
-	return true
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User logged in successfully"})
 }
