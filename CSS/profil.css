@@ -20,7 +20,7 @@ h1 {
     align-items: center;
 }
 
-.right-elements img{
+.right-elements img {
     width: 100px;
 }
 
@@ -76,7 +76,7 @@ main {
     font-size: 16px;
 }
 
-.edit-profile {
+.edit-profile { /* Changed class to edit-profile */
     text-align: center;
 }
 
@@ -92,12 +92,6 @@ main {
 .edit-profile a:hover {
     background-color: #d4af37;
 }
-
-
-.edit-profile a:hover {
-    background-color: #d4af37;
-}
-
 
 .user-info-container {
     position: absolute;
