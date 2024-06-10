@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	err := godotenv.Load("/home/christian/forum/forum/session_secret.env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading.env file")
 	} else {
