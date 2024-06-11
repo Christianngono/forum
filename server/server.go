@@ -32,10 +32,10 @@ func main() {
 	http.HandleFunc("/login", forum.LoginHandler)
 	http.HandleFunc("/create-post", forum.CreatePostHandler)
 	http.HandleFunc("/get-posts", forum.GetPostsHandler)
-	http.HandleFunc("/get-post_id", forum.GetPostHandler)
+	http.HandleFunc("/get-post", forum.GetPostHandler)
     http.HandleFunc("/create-comment", forum.CreateCommentHandler)
     http.HandleFunc("/get-comments", forum.GetCommentsHandler)
-	http.HandleFunc("/get-comment_id", forum.GetCommentHandler)
+	http.HandleFunc("/get-comment", forum.GetCommentHandler)
     http.HandleFunc("/like-post", forum.LikePostHandler)
 	http.HandleFunc("/get-dislike-post", forum.DislikePostHandler)
 
