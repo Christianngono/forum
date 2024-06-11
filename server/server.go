@@ -32,10 +32,13 @@ func main() {
 	http.HandleFunc("/login", forum.LoginHandler)
 	http.HandleFunc("/create-post", forum.CreatePostHandler)
 	http.HandleFunc("/get-posts", forum.GetPostsHandler)
-	http.HandleFunc("/create-comment", forum.CreateCommentHandler)
-	http.HandleFunc("/get-comments", forum.GetCommentsHandler)
-	http.HandleFunc("/like-post", forum.LikePostHandler)
-	http.HandleFunc("/dislike-post", forum.DislikePostHandler)
+	http.HandleFunc("/get-post_id", forum.GetPostHandler)
+    http.HandleFunc("/create-comment", forum.CreateCommentHandler)
+    http.HandleFunc("/get-comments", forum.GetCommentsHandler)
+	http.HandleFunc("/get-comment_id", forum.GetCommentHandler)
+    http.HandleFunc("/like-post", forum.LikePostHandler)
+	http.HandleFunc("/get-dislike-post", forum.DislikePostHandler)
+
 
 	log.Println("Server started on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
