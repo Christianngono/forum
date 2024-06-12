@@ -31,9 +31,15 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "create-template", r)
 		return
 	}
+	session, _ := getSessionStore().Get(r, "session")
+    userID, ok := session.Values["user_id"].(int)
+    if !ok {
+        http.Error(w, "User not logged in", http.StatusUnauthorized)
+        return
+    }
 
 	var post Post
-	post.UserID = post.ID
+	post.UserID = userID
 	post.Title = r.FormValue("title")
 	post.Content = r.FormValue("content")
 	post.CreatedAt = time.Now()
