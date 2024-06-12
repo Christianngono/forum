@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"log"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -17,6 +19,8 @@ type User struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Posts    []Post `json:"posts"`
+	Comments []Comment `json:"comments"`
 }
 
 var templates = template.Must(template.ParseFiles("../templates/index.html",
@@ -27,16 +31,18 @@ var templates = template.Must(template.ParseFiles("../templates/index.html",
 	"../templates/comments.html",
 	"../templates/create-comment.html",
 	"../templates/post.html",
-    "../templates/comment.html",
-    "../templates/likes.html",
-    "../templates/dislikes.html",
+	"../templates/comment.html",
+	"../templates/likes.html",
+	"../templates/dislikes.html",
 ))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	err := templates.ExecuteTemplate(w, tmpl, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	log.Println("Rendered template:", tmpl)
 }
 
 func getSessionStore() *sessions.CookieStore {
@@ -45,11 +51,10 @@ func getSessionStore() *sessions.CookieStore {
 	if secretKey == "" {
 		// Si la clé n'est pas définie, retourner une erreur (ou utiliser une clé par défaut pour le développement)
 		// A remplacer par une vraie clé en production
-		secretKey = "default-secret-key" 
+		println("Clé pas défini")
 	}
-	return sessions.NewCookieStore([]byte(secretKey))	
+	return sessions.NewCookieStore([]byte(secretKey))
 }
-
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "index.html", nil)
@@ -70,19 +75,26 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var user User
 	// Décoder le formulaire envoyé
+	// Convertir la valeur id en int
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err!= nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+	user.ID = id 
 	user.Email = r.FormValue("email")
 	user.Username = r.FormValue("username")
 	user.Password = r.FormValue("password")
 
 	// Hacher le mot de passe avant de le stocker dans la base de données
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
+	if err != nil { 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	user.Password = string(hashedPassword)
 
-	stmt, err := DB.Prepare("INSERT INTO users (email, username, password) VALUES (?,?,?)")
+	stmt, err := DB.Prepare("INSERT INTO users (email, username, password,) VALUES (?,?,?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -121,33 +133,35 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Comparer les mots de passe 
+	// Comparer les mots de passe
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-		
-	}
-	
-	// Créer une sessionID à l' UUID 
-	sessionID := uuid.New().String()
 
+	}
+
+	// Créer une sessionID à l' UUID
+	sessionID := uuid.New().String()
 
 	// Initialiser le store de session
 	store := getSessionStore()
 	session, err := store.Get(r, "session")
-	if err!= nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer session.Save(r, w)
 
 	// Stocker l'ID de session dans les valeurs de session
+	session.Values["post_id"] = user.ID
 	session.Values["user_id"] = user.ID
 	session.Values["username"] = user.Username
 	session.Values["email"] = user.Email
 	session.Values["session_id"] = sessionID
 	session.Save(r, w)
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User logged in successfully"})
+	/*w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User logged in successfully"})*/
+
+	http.Redirect(w, r, "/get-posts", http.StatusSeeOther)
 }
