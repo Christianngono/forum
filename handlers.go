@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"log"
-	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -75,13 +74,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var user User
 	// Décoder le formulaire envoyé
-	// Convertir la valeur id en int
-	id, err := strconv.Atoi(r.FormValue("id"))
-	if err!= nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-	user.ID = id 
 	user.Email = r.FormValue("email")
 	user.Username = r.FormValue("username")
 	user.Password = r.FormValue("password")
