@@ -31,6 +31,8 @@ func InitDB() {
 		title TEXT NOT NULL,
 		content TEXT NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		likes INTEGER DEFAULT 0,
+		dislikes INTEGER DEFAULT 0,
 		FOREIGN KEY (user_id) REFERENCES users(id)
 	);`
 	createCommentsTable := `CREATE TABLE IF NOT EXISTS comments (
