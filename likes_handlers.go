@@ -1,8 +1,8 @@
 package forum
 
-import (
-	"encoding/json"
+import ( 
 	"net/http"
+	"strconv"
 )
 
 type Like struct {
@@ -17,50 +17,33 @@ type Dislike struct {
 
 // Handler pour gérer les likes sur les posts
 func LikePostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
+	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
+	if err!= nil {
+        http.Error(w, "Invalid post ID", http.StatusBadRequest)
+        return
+    }
 
-	var like Like
-	err := json.NewDecoder(r.Body).Decode(&like)
+	_, err = DB.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	_, err = DB.Exec("INSERT INTO likes (user_id, post_id) VALUES (?, ?)", like.UserID, like.PostID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Render template for likes
-	renderTemplate(w, "likes.html", nil) // Change "likes.html" to your actual template name
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+	http.Redirect(w, r, "/get-post?id="+ strconv.Itoa(postID), http.StatusSeeOther)
 }
+
 
 // Handler pour gérer les dislikes sur les posts
 func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
+	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
+    if err!= nil {
+        http.Error(w, "Invalid post ID", http.StatusBadRequest)
+        return
+    }
 
-	var dislike Dislike
-	err := json.NewDecoder(r.Body).Decode(&dislike)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	_, err = DB.Exec("INSERT INTO dislikes (user_id, post_id) VALUES (?, ?)", dislike.UserID, dislike.PostID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Render template for dislikes
-	renderTemplate(w, "dislikes.html", nil)
+    _, err = DB.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id =?", postID)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    http.Redirect(w, r, "/get-post?id="+strconv.Itoa(postID), http.StatusSeeOther)	
 }
