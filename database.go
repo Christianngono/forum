@@ -14,7 +14,9 @@ func InitDB() {
 	DB, err = sql.Open("sqlite3", "./forum.db")
 	if err != nil {
 		log.Fatalf("Error opening database: %v\n", err)
+		return
 	}
+	log.Println("Connected to database")
 
 	// Code pour créer les tables dans la base de données
 	createUsersTable := `CREATE TABLE IF NOT EXISTS users (
@@ -29,6 +31,8 @@ func InitDB() {
 		title TEXT NOT NULL,
 		content TEXT NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		likes INTEGER DEFAULT 0,
+		dislikes INTEGER DEFAULT 0,
 		FOREIGN KEY (user_id) REFERENCES users(id)
 	);`
 	createCommentsTable := `CREATE TABLE IF NOT EXISTS comments (

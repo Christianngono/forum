@@ -1,8 +1,8 @@
 package forum
 
 import (
-	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 type Like struct {
@@ -17,50 +17,32 @@ type Dislike struct {
 
 // Handler pour gérer les likes sur les posts
 func LikePostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var like Like
-	err := json.NewDecoder(r.Body).Decode(&like)
+	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
 
-	_, err = DB.Exec("INSERT INTO likes (user_id, post_id) VALUES (?, ?)", like.UserID, like.PostID)
+	_, err = DB.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// Render template for likes
-	renderTemplate(w, "likes.html", nil) // Change "likes.html" to your actual template name
+	http.Redirect(w, r, "/get-post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 }
 
 // Handler pour gérer les dislikes sur les posts
 func DislikePostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var dislike Dislike
-	err := json.NewDecoder(r.Body).Decode(&dislike)
+	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
 
-	_, err = DB.Exec("INSERT INTO dislikes (user_id, post_id) VALUES (?, ?)", dislike.UserID, dislike.PostID)
+	_, err = DB.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id =?", postID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// Render template for dislikes
-	renderTemplate(w, "dislikes.html", nil)
+	http.Redirect(w, r, "/get-post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 }

@@ -1,20 +1,12 @@
 package forum
 
 import (
-	"encoding/json"
+	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 )
-
-type Comment struct {
-	ID        int       `json:"id"`
-	PostID    int       `json:"post_id"`
-	UserID    int       `json:"user_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-}
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour la création de commentaire
@@ -33,50 +25,30 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Enregistrez les valeurs du formulaire pour le débogage
 	log.Println("Form Values:", r.Form)
 
-	// Récupérer le post_id des valeurs du formulaire
-	postIDStr := r.FormValue("post_id")
-	log.Println("Received post_id:", postIDStr)
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil || postID <= 0 {
-		log.Println("Invalid post_id:", postIDStr)
+	session, _ := getSessionStore().Get(r, "session")
+	userID, ok := session.Values["user_id"].(int)
+
+	if !ok {
+		http.Error(w, "User not logged in", http.StatusUnauthorized)
+		return
+	}
+	log.Println("Parsed user_id:", userID)
+
+	postID, err := strconv.Atoi(r.FormValue("post_id"))
+	if err != nil {
 		http.Error(w, "Invalid post_id", http.StatusBadRequest)
 		return
 	}
+	log.Println("Parsed post_id:", postID)
 
-	// Obtenir user_id à partir des valeurs du formulaire
-	userIDStr := r.FormValue("user_id")
-	log.Println("Received user_id:", userIDStr)
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil || userID <= 0 {
-		log.Println("Invalid user_id:", userIDStr)
-		http.Error(w, "Invalid user_id", http.StatusBadRequest)
-		return
-	}
-
-	// Valider si le post_id existe
-	var exists bool
-	err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM posts WHERE id = ?)", postID).Scan(&exists)
-	if err != nil {
-		log.Println("Database error:", err)
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
-	if !exists {
-		log.Println("Post not found:", postID)
-		http.Error(w, "Post not found", http.StatusNotFound)
-		return
-	}
-
-	comment := Comment{
-		PostID:    postID,
-		UserID:    userID,
-		Content:   r.FormValue("content"),
-		CreatedAt: time.Now(),
-	}
+	var comment Comment
+	comment.UserID = userID
+	comment.PostID = postID
+	comment.Content = r.FormValue("content")
+	comment.CreatedAt = time.Now()
 
 	stmt, err := DB.Prepare("INSERT INTO comments (post_id, user_id, content, created_at) VALUES (?, ?, ?, ?)")
 	if err != nil {
-		log.Println("Prepare statement error:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -84,16 +56,19 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = stmt.Exec(comment.PostID, comment.UserID, comment.Content, comment.CreatedAt)
 	if err != nil {
-		log.Println("Exec statement error:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusCreated)
-	renderTemplate(w, "comments.html", nil)
+	http.Redirect(w, r, "/get-post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
+	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+	log.Println("Received post_id:", postID)
 	// Code pour récupérer les commentaires
 	rows, err := DB.Query("SELECT id, post_id, user_id, content, created_at FROM comments")
 	if err != nil {
@@ -112,28 +87,31 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		comments = append(comments, comment)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comments)
+	if err = rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	renderTemplate(w, "comments.html", comments)
 }
 
 func GetCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Code pour récupérer un commentaire
-	commentIDStr := r.URL.Query().Get("id")
-	log.Println("Received comment_id:", commentIDStr)
-	commentID, err := strconv.Atoi(commentIDStr)
-	if err != nil || commentID <= 0 {
-		log.Println("Invalid comment_id:", commentIDStr)
-		http.Error(w, "Invalid comment_id", http.StatusBadRequest)
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
 		return
 	}
+	log.Println("Received comment_id:", id)
 
 	var comment Comment
-	err = DB.QueryRow("SELECT id, post_id, user_id, content, created_at FROM comments WHERE id = ?", commentID).Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt)
+	err = DB.QueryRow("SELECT id, post_id, user_id, content, created_at FROM comments WHERE id =?", id).Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt)
 	if err != nil {
-		log.Println("Database error:", err)
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		if err == sql.ErrNoRows {
+			http.Error(w, "Comment not found", http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comment)
+	renderTemplate(w, "comment.html", comment)
 }
