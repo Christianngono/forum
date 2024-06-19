@@ -92,4 +92,6 @@ func InitDB() {
         }
 		log.Printf("Created table: %s", statement)
 	}
+	log.Println("Created tables")
+	log.Println("Database initialised")
 }
