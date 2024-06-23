@@ -1,126 +1,131 @@
 package forum
 
 import (
-	"text/template"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
+	"path/filepath"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID       int       `json:"id"`
-	Email    string    `json:"email"`
-	Username string    `json:"username"`
-	Password string    `json:"-"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET_KEY")))
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	t, err := template.ParseFiles(fmt.Sprintf("/home/christian/forum/forum/templates/%s", tmpl))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = t.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-	} 
-}
-
-func getSessionStore() *sessions.CookieStore {
-	// Charger la clé secrète à partir des variables d'environnement
-	secretKey := os.Getenv("SESSION_SECRET_KEY")
-	if secretKey == "" {
-		secretKey = "defaultSecretKey"
-	}
-	return sessions.NewCookieStore([]byte(secretKey))
-}
+var templates = template.Must(template.ParseGlob(filepath.Join("templates", "*.html")))
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "/home/christian/forum/forum/templates/index.html")
-	
+	posts := []Post{}
+	// Récupérer posts de database
+	rows, err := DB.Query("SELECT * FROM posts")
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		post := Post{}
+		err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.Likes, &post.Dislikes)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	session, err := store.Get(r, "session")
+	if err != nil {
+		http.Error(w, "Error getting session", http.StatusInternalServerError)
+		return
+	}
+	userID, ok := session.Values["user_id"].(int)
+	if !ok {
+		templates.ExecuteTemplate(w, "index.html", posts)
+		return
+	}
+	user := User{}
+	err = DB.QueryRow("SELECT * FROM users WHERE id =?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	templates.ExecuteTemplate(w, "index.html", posts)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	store := getSessionStore()
-	session, _ := store.Get(r, "session")
+	session, err := store.Get(r, "session")
+	if err != nil {
+		http.Error(w, "Error getting session", http.StatusInternalServerError)
+		return
+	}
+
 	delete(session.Values, "user_id")
 	session.Save(r, w)
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	templates.ExecuteTemplate(w, "register.html", nil)
 	if r.Method == http.MethodPost {
-		http.ServeFile(w, r, "/home/christian/forum/forum/templates/register.html")
+		email := r.FormValue("email")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Error hashing password", http.StatusInternalServerError)
+			return
+		}
+		_, err = DB.Exec("INSERT INTO users (email, username, password) VALUES (?,?,?)", email, username, hashedPassword)
+		if err != nil {
+			http.Error(w, "Error inserting user", http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	var user User
-	// Décoder le formulaire envoyé
-	user.Email = r.FormValue("email")
-	user.Username = r.FormValue("username")
-	user.Password = r.FormValue("password")
-
-	// Hacher le mot de passe avant de le stocker dans la base de données
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
+	if err := templates.ExecuteTemplate(w, "register.html", nil); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
-	user.Password = string(hashedPassword)
-
-	stmt, err := DB.Prepare(`INSERT INTO users (email, username, password) VALUES (?, ?, ?)`)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(user.Email, user.Username, user.Password)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Code pour gérer la connexion
+	templates.ExecuteTemplate(w, "login.html", nil)
 	if r.Method == http.MethodPost {
-		http.ServeFile(w, r, "/home/christian/forum/forum/templates/login.html")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+
+		var user User
+		err := DB.QueryRow("SELECT id, username, password FROM users WHERE username = ?", username).Scan(&user.ID, &user.Username, &user.Password)
+		if err != nil {
+			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+			return
+		}
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, "Error getting session", http.StatusInternalServerError)
+			return
+		}
+		session.Values["user_id"] = user.ID
+		session.Save(r, w)
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-
-	// Lire les données du formulaire
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-
-	var user User
-	err := DB.QueryRow("SELECT id, email, username, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
-	if err != nil {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-		return	
+	if err := templates.ExecuteTemplate(w, "login.html", nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
-	// Comparer les mots de passe
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-		return
-	}
-
-	// Créer une sessionID à l' UUID
-	sessionID, _ := uuid.NewRandom()
-
-	store := getSessionStore()
-	session, _ := store.Get(r, "session")
-
-	session.Values["user_id"] = user.ID
-	session.Values["session_id"] = sessionID.String()
-	session.Save(r, w)
-
-	http.Redirect(w, r, "/get-posts", http.StatusSeeOther)
 }
