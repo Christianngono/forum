@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Likes</title>
-    <link rel="stylesheet" href="/static/css/likes.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Likes</title>
 </head>
 <body>
-    <h1>Likes</h1>
-    <div class="likes">
-        <!-- Display likes here -->
-        <div class="like">
-            <h2>Post Title 1</h2>
-            <p>User who liked...</p>
-        </div>
-        <div class="like">
-            <h2>Post Title 2</h2>
-            <p>User who liked...</p>
-        </div>
-        <!-- More likes -->
-    </div>
-    <a href="/">Home</a>
-    <a href="/likes">Likes</a>
-    <a href="/dislikes">Dislikes</a>
+    <header>
+        <h1>Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Users who liked {{ .Post.Title }}</h2>
+        <ul>
+            {{ range .Users }}
+            <li>{{ .Username }}</li>
+            {{ end }}
+        </ul>
+    </main>
 </body>
 </html>
