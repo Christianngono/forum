@@ -12,10 +12,10 @@ import (
 )
 
 type User struct {
-	ID       int    `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	ID       int
+	Email    string
+	Username string
+	Password string
 }
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET_KEY")))
