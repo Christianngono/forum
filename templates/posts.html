@@ -1,13 +1,30 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autre page</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Posts</title>
 </head>
 <body>
-    <h1>Autre page</h1>
-    <p>Cette page est une autre page de votre application.</p>
-    <a href="/"><button>Retourner à la page d'accueil</button></a>
+    <header>
+        <h1>Forum</h1>
+        <nav>
+            <a href="/create-post">Create Post</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>All Posts</h2>
+        <ul>
+            {{ range .Posts }}
+            <li>
+                <a href="/post?id={{ .ID }}">{{ .Title }}</a>
+                <p>{{ .Content }}</p>
+                <p>Likes: {{ .Likes }} Dislikes: {{ .Dislikes }}</p>
+            </li>
+            {{ end }}
+        </ul>
+    </main>
 </body>
 </html>

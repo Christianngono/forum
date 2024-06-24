@@ -1,28 +1,30 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connection</title>
-    <link rel="stylesheet" href="../CSS/login.css">
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Login</title>
 </head>
 <body>
-<div class="container">
-    <h2>Connection</h2>
-    <form id="loginForm">
-        <div class="form-group">
-            <label for="email">Email address:</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
+    <header>
+        <h1>Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/register">Register</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Login</h2>
+        <form action="/login" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
-        </div>
-        <button href="homeRegister.html">Login</button>
-    </form>
-    <div class="link">
-        <a href="register.html">Register</a>
-    </div>
-</div>
+            <button type="submit">Login</button>
+        </form>
+    </main>
+    </main>
 </body>
 </html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Likes</title>
+</head>
+<body>
+    <header>
+        <h1>Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Users who liked {{ .Post.Title }}</h2>
+        <ul>
+            {{ range .Users }}
+            <li>{{ .Username }}</li>
+            {{ end }}
+        </ul>
+    </main>
+</body>
+</html>

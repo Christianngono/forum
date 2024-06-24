@@ -1,0 +1,89 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Style for h1 */
+h1 {
+    font-size: 3rem;
+    color: #8e44ad; /* Violet color */
+    text-shadow: 2px 2px 4px #000000;
+    margin-bottom: 20px;
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* Style for form */
+form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: slideIn 1s ease-in-out;
+}
+
+/* Style for input fields */
+input[type="text"], input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Style for submit button */
+input[type="submit"] {
+    background-color: #8e44ad; /* Violet color */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: #7d3c98; /* Darker violet color */
+    transform: scale(1.05);
+}
+
+/* Style for links */
+a {
+    color: #8e44ad; /* Violet color */
+    text-decoration: none;
+    margin: 10px;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #7d3c98; /* Darker violet color */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

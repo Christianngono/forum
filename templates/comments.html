@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/style.css">
-    <title>Forum - Post</title>
+    <title>Forum - Comments</title>
 </head>
 <body>
     <header>
@@ -15,11 +15,7 @@
         </nav>
     </header>
     <main>
-        <h2>{{ .Post.Title }}</h2>
-        <p>{{ .Post.Content }}</p>
-        <p>Likes: {{ .Post.Likes }} Dislikes: {{ .Post.Dislikes }}</p>
-        <a href="/edit-post?id={{ .Post.ID }}">Edit Post</a>
-        <h3>Comments</h3>
+        <h2>Comments for {{ .Post.Title }}</h2>
         <ul>
             {{ range .Comments }}
             <li>
@@ -28,11 +24,6 @@
             </li>
             {{ end }}
         </ul>
-        <form action="/create-comment" method="post">
-            <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-            <textarea name="content" required></textarea>
-            <button type="submit">Add Comment</button>
-        </form>
     </main>
 </body>
 </html>

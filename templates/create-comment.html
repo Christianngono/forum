@@ -4,15 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Comment</title>
-    <link rel="stylesheet" href="/static/css/create-comment.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Create Comment</title>
 </head>
 <body>
-    <h1>Create Comment</h1>
-    <form method="POST" action="/create-comment">
-        <!-- Form fields for creating a comment -->
-        <input type="hidden" name="post_id" value="{{.PostID}}">
-        <textarea name="content" placeholder="Write your comment here..." required></textarea><br>
-        <button type="submit">Submit Comment</button>
-    </form>
+    <header>
+        <h1>Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Create Comment</h2>
+        <form action="/create-comment" method="post">
+            <input type="hidden" name="post_id" value="{{ .PostID }}">
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" required></textarea>
+            <button type="submit">Create Comment</button>
+        </form>
+    </main>   
 </body>
 </html>
