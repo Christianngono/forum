@@ -20,7 +20,7 @@ type User struct {
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET_KEY")))
 
-var templates = template.Must(template.ParseGlob(filepath.Join("templates", "*.html")))
+var templates = template.Must(template.ParseGlob(filepath.Join("..", "templates", "*.html")))
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	posts := []Post{}
