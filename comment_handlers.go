@@ -18,12 +18,17 @@ type Comment struct {
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Créer un commentaire
 	if r.Method == http.MethodPost {
-		session, _ := store.Get(r, "session")
-		userID, ok := session.Values["user_id"].(int)
-		if !ok {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, "Error getting session", http.StatusUnauthorized)
 			return
 		}
+
+		userID, ok := session.Values["user_id"].(int)
+		if!ok {
+            http.Error(w, "User not logged in", http.StatusUnauthorized)
+            return
+        }
 
 		postID, err := strconv.Atoi(r.FormValue("post_id"))
 		if err != nil {
@@ -32,63 +37,55 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		content := r.FormValue("content")
-
-		_, err = DB.Exec("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)", postID, userID, content)
+		_, err = DB.Exec("INSERT INTO comments (post_id, user_id, content, created_at) VALUES (?, ?, ?, ?)", postID, userID, content, time.Now())
 		if err != nil {
 			http.Error(w, "Error creating comment", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/get-post?id=%d", postID), http.StatusSeeOther)
-		return
-	}
-	if err := templates.ExecuteTemplate(w, "create-comment.html", nil); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		http.Redirect(w, r, "/post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 	}
 }
 
 func EditCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		commentID, err := strconv.Atoi(r.FormValue("id"))
+
+		session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, "Error getting session", http.StatusInternalServerError)
+			return
+		}
+		userID, ok := session.Values["user_id"].(int)
+		if !ok {
+			http.Error(w, "User not logged in", http.StatusUnauthorized)
+			return
+		}
+
+		commentID, err := strconv.Atoi(r.FormValue("comment_id"))
 		if err != nil {
 			http.Error(w, "Invalid comment ID", http.StatusBadRequest)
 			return
 		}
-
 		content := r.FormValue("content")
+
+		var existingComment Comment
+		err = DB.QueryRow("SELECT user_id, post_id FROM comments WHERE id = ?", commentID).Scan(&existingComment.UserID, &existingComment.PostID)
+		if err != nil {
+			http.Error(w, "Comment not found", http.StatusNotFound)
+			return
+		}
+		if existingComment.UserID != userID {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 
 		_, err = DB.Exec("UPDATE comments SET content = ? WHERE id = ?", content, commentID)
 		if err != nil {
 			http.Error(w, "Error updating comment", http.StatusInternalServerError)
 			return
 		}
-
-		postID, err := strconv.Atoi(r.FormValue("post_id"))
-		if err != nil {
-			http.Error(w, "Invalid post ID", http.StatusBadRequest)
-			return
-		}
-
-		http.Redirect(w, r, fmt.Sprintf("/get-post?id=%d", postID), http.StatusSeeOther)
-		return
-	}
-	commentID, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
-		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
-		return
-	}
-
-	var comment Comment
-	err = DB.QueryRow("SELECT id, post_id, content, FROM comments WHERE id = ?", commentID).Scan(&comment.ID, &comment.PostID, &comment.Content)
-	if err != nil {
-		http.Error(w, "Comment not found", http.StatusNotFound)
-		return
-	}
-	if err := templates.ExecuteTemplate(w, "edit-comment.html", comment); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		http.Redirect(w, r, "/post?id="+strconv.Itoa(existingComment.PostID), http.StatusSeeOther)
+	}		
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,23 +187,37 @@ func UpdateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeleteCommentHandler(w http.ResponseWriter, r *http.Request) {
 	//Supprimer un commentaire
-	commentID, err := strconv.Atoi(r.URL.Query().Get("comment_id"))
-	if err != nil {
-		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
-		return
+	if r.Method == http.MethodPost {
+		sesion, err := store.Get(r, "session")
+		if err!= nil {
+            http.Error(w, "Error getting session", http.StatusUnauthorized)
+            return
+        }
+		userID, ok := sesion.Values["user_id"].(int)
+		if!ok {
+            http.Error(w, "User not logged in", http.StatusUnauthorized)
+            return
+        }
+		commentID, err := strconv.Atoi(r.FormValue("comment_id"))
+		if err!= nil {
+            http.Error(w, "Invalid comment ID", http.StatusBadRequest)
+            return
+        }
+		var existingComment Comment 
+		err = DB.QueryRow("SELECT user_id, post_id FROM comments WHERE id = ?", commentID).Scan(&existingComment.UserID, &existingComment.PostID)
+		if err!= nil {
+            http.Error(w, "Comment not found", http.StatusNotFound)
+            return
+        }
+		if existingComment.UserID != userID {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+		}
+		_, err = DB.Exec("DELETE FROM comments WHERE id =?", commentID)
+		if err!= nil {
+            http.Error(w, "Error deleting comment", http.StatusInternalServerError)
+            return
+        }
+		http.Redirect(w, r, "/post?id="+strconv.Itoa(existingComment.PostID), http.StatusSeeOther)
 	}
-
-	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
-	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-		return
-	}
-
-	_, err = DB.Exec("DELETE FROM comments WHERE id = ?", commentID)
-	if err != nil {
-		http.Error(w, "Error deleting comment", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/get-post?id=%d", postID), http.StatusSeeOther)
 }
