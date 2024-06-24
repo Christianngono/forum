@@ -3,45 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posts - Forum</title>
-    <link rel="stylesheet" href="../CSS/homeRegister.css">
+    <title>Autre page</title>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="header-left">
-                <img src="../IMAGE/Logo TITUS.png" alt="Logo" class="logo">
-            </div>
-            <div class="title-container">
-                <h1 class="welcome-text">Welcome to TITUS</h1>
-                <p>TITUS is a forum where you can share your opinions, debate, share, talk with other users as long as respect for others and their opinions is not compromised. Here you are free! </p> 
-            </div>
-            <div class="header-right">
-                <a href="profil.html">
-                    <img src="../IMAGE/Avatar 0.jpg" alt="Avatar" class="avatar" id="profileAvatar">
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
-            <h2>Last posts</h2>
-            {{range .Posts}}
-            <div class="post">
-                <h3>{{.Title}}</h3>
-                <p>{{.Content}}</p>
-                <p><small>Posted by {{.UserID}} the {{.CreatedAt}}</small></p>
-                <p><a href="posts.html">Lire la suite...</a></p>
-            </div>
-            {{end}}
-        </div>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 Forum. All rights reserved.</p>
-        </div>
-    </footer>
+    <h1>Autre page</h1>
+    <p>Cette page est une autre page de votre application.</p>
+    <a href="/"><button>Retourner à la page d'accueil</button></a>
 </body>
 </html>
