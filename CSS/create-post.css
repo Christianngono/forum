@@ -1,6 +1,4 @@
-/* homeRegister.css */
-
-/* Style global */
+/* Style de base */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -232,4 +230,4 @@ textarea {
     font-size: 1.2em;
     border: none;
     border-radius: 5
-} 
+}

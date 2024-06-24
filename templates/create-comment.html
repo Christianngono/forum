@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Comment</title>
+    <link rel="stylesheet" href="/static/css/create-comment.css">
+</head>
+<body>
+    <h1>Create Comment</h1>
+    <form method="POST" action="/create-comment">
+        <!-- Form fields for creating a comment -->
+        <input type="hidden" name="post_id" value="{{.PostID}}">
+        <textarea name="content" placeholder="Write your comment here..." required></textarea><br>
+        <button type="submit">Submit Comment</button>
+    </form>
+</body>
+</html>
