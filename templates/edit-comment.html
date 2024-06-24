@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Edit Comment</title>
+</head>
+<body>
+    <header>
+        <h1>Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Edit Comment</h2>
+        <form action="/edit_comment" method="post">
+            <input type="hidden" name="comment_id" value="{{ .ID }}">
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" required>{{ .Content }}</textarea>
+            <button type="submit">Update Comment</button>
+        </form>
+    </main>
+</body>
+</html>
