@@ -3,30 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum</title>
-    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Forum - Home</title>
 </head>
 <body>
     <header>
         <h1>Welcome to the Forum</h1>
         <nav>
-            <a href="/register">Register</a>
-            <a href="/login">Login</a>
-            <a href="/create-post">Create a new post</a>
-            <a href="/get-posts">View posts</a>
+            <a href="/create-post">Create Post</a>
+            <a href="/logout">Logout</a>
         </nav>
     </header>
     <main>
-        <h2>Latest Posts</h2>
-        <div id="posts">
-            {{range .}}
-            <div class="post">
-                <h3>{{.Title}}</h3>
-                <p>{{.Content}}</p>
-                <a href="/get-post?id={{.ID}}">Read More</a>
-            </div>
-            {{end}}
-        </div>   
-    </main>
+        <h2>Posts</h2>
+        <ul>
+            {{ range . }}
+            <li>
+                <a href="/post?id={{ .ID }}">{{ .Title }}</a>
+                <p>{{ .Content }}</p>
+                <p>Likes: {{ .Likes }} Dislikes: {{ .Dislikes }}</p>
+            </li>
+            {{ end }}
+        </ul>
+    </main>   
 </body>
 </html>
