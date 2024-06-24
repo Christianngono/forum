@@ -41,8 +41,6 @@ func main() {
 	http.HandleFunc("/filter-comment", forum.FilterCommentHandler)
 	http.HandleFunc("/update-comment", forum.UpdateCommentHandler)
 	http.HandleFunc("/delete-comment", forum.DeleteCommentHandler)
-	http.HandleFunc("/get-like-post", forum.LikePostHandler)
-	http.HandleFunc("/get-dislike-post", forum.DislikePostHandler)
 	http.HandleFunc("/like-post", forum.LikePostHandler)
 	http.HandleFunc("/get-posts", forum.GetPostsHandler)
 	http.HandleFunc("/get-post", forum.GetPostHandler)
