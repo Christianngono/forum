@@ -11,7 +11,7 @@ type Post struct {
 	UserID    int      `json:"user_id"`    
 	Title     string   `json:"title"`   
 	Content   string   `json:"content"`   
-	CreatedAt time.Time `json:"created_at"` 
+	CreatedAt time.Time `json:"created_at"`
 	Likes     int       `json:"likes"` 
 	Dislikes int        `json:"dislikes"` 
 }
@@ -20,27 +20,25 @@ type Post struct {
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == http.MethodPost {
-        session, _ := store.Get(r, "session")
-		userID, ok := session.Values["user_id"].(int)
-		if !ok {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, "Error getting sesion", http.StatusInternalServerError)
 			return
+        }
+		userID, ok := session.Values["user_id"].(int)
+		if!ok {
+            http.Error(w, "User not logged in", http.StatusUnauthorized)
+            return
         }
 
         title := r.FormValue("title")
         content := r.FormValue("content")
-        _, err := DB.Exec("INSERT INTO posts (user_id, title, content) VALUES (?,?,?)", userID, title, content)
+        _, err = DB.Exec("INSERT INTO posts (user_id, title, content, created_at) VALUES (?,?,?, ?)", userID, title, content, time.Now())
         if err!= nil {
             http.Error(w, "Error creating post", http.StatusInternalServerError)
             return
         }
-        http.Redirect(w, r, "/posts", http.StatusSeeOther)
-        return  
-    }
-
-	if err := templates.ExecuteTemplate(w, "create_post.html", nil); err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
+        http.Redirect(w, r, "/posts", http.StatusSeeOther)  
     }
 }
 
@@ -78,11 +76,10 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request){
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
-
-	if err := templates.ExecuteTemplate(w, "edit_post.html", post); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	if err := templates.ExecuteTemplate(w, "edit_post.html", post); err!= nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 }
 func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
     postID, err := strconv.Atoi(r.FormValue("id"))
@@ -128,8 +125,6 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-
 func GetPostHandler(w http.ResponseWriter, r *http.Request) {
     postID, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
@@ -172,19 +167,42 @@ func FilterPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
-    postID, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-		return
-	}
+	if r.Method == http.MethodPost {
+		session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, "Error getting session", http.StatusInternalServerError)
+			return
+		}
+		userID, ok := session.Values["user_id"].(int)
+		if !ok {
+			http.Error(w, "User not logged in", http.StatusUnauthorized)
+			return
+		}
 
-	_, err = DB.Exec("DELETE FROM posts WHERE id = ?", postID)
-	if err != nil {
-		http.Error(w, "Error deleting post", http.StatusInternalServerError)
-		return
-	}
+		postID, err := strconv.Atoi(r.FormValue("post_id"))
+		if err != nil {
+			http.Error(w, "Invalid post ID", http.StatusBadRequest)
+			return
+		}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)	
+		var existingPost Post
+		err = DB.QueryRow("SELECT user_id FROM posts WHERE id = ?", postID).Scan(&existingPost.UserID)
+		if err != nil {
+			http.Error(w, "Post not found", http.StatusNotFound)
+			return
+		}
+		if existingPost.UserID != userID {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		_, err = DB.Exec("DELETE FROM posts WHERE id = ?", postID)
+		if err != nil {
+			http.Error(w, "Error deleting post", http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}   
 }
 	
 
