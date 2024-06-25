@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -23,41 +22,12 @@ var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET_KEY")))
 var templates = template.Must(template.ParseGlob(filepath.Join("..", "templates", "*.html")))
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	posts := []Post{}
-	// Récupérer posts de database
-	rows, err := DB.Query("SELECT * FROM posts")
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		post := Post{}
-		err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.Likes, &post.Dislikes)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-		posts = append(posts, post)
-	}
-
-	session, err := store.Get(r, "session")
-	if err != nil {
-		http.Error(w, "Error getting session", http.StatusInternalServerError)
-		return
-	}
-	userID, ok := session.Values["user_id"].(int)
-	if !ok {
-		templates.ExecuteTemplate(w, "index.html", posts)
-		return
-	}
-	user := User{}
-	err = DB.QueryRow("SELECT * FROM users WHERE id =?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	templates.ExecuteTemplate(w, "index.html", posts)
+	session, _ := store.Get(r, "session")
+    if session.Values["user_id"] != nil {
+        http.Redirect(w, r, "/posts", http.StatusSeeOther)
+        return
+    }
+    templates.ExecuteTemplate(w, "index.html", nil)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,13 +38,15 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	delete(session.Values, "user_id")
-	session.Save(r, w)
+	if err := session.Save(r, w); err != nil {
+		http.Error(w, "Error saving session", http.StatusInternalServerError)
+		return
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "register.html", nil)
 	if r.Method == http.MethodPost {
 		email := r.FormValue("email")
 		username := r.FormValue("username")
@@ -98,7 +70,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "login.html", nil)
 	if r.Method == http.MethodPost {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
@@ -111,7 +82,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 		if err != nil {
-			fmt.Println(err)
+			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
 			return
 		}
 		session, err := store.Get(r, "session")
@@ -120,8 +91,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		session.Values["user_id"] = user.ID
-		session.Save(r, w)
-
+		if err := session.Save(r, w); err!= nil {
+            http.Error(w, "Error saving session", http.StatusInternalServerError)
+            return
+        }
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
