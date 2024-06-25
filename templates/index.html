@@ -10,21 +10,12 @@
     <header>
         <h1>Welcome to the Forum</h1>
         <nav>
-            <a href="/create-post">Create Post</a>
-            <a href="/logout">Logout</a>
+            <a href="/register">Register</a>
+            <a href="/login">Login</a>
         </nav>
     </header>
     <main>
-        <h2>Posts</h2>
-        <ul>
-            {{ range . }}
-            <li>
-                <a href="/post?id={{ .ID }}">{{ .Title }}</a>
-                <p>{{ .Content }}</p>
-                <p>Likes: {{ .Likes }} Dislikes: {{ .Dislikes }}</p>
-            </li>
-            {{ end }}
-        </ul>
+        <p>Please register or login to continue.</p>
     </main>   
 </body>
 </html>
